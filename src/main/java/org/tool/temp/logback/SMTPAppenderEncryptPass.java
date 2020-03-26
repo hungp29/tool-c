@@ -21,14 +21,17 @@ public class SMTPAppenderEncryptPass extends SMTPAppender {
 
     @Override
     public void setPassword(String password) {
-        try {
-            ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
-            String algorithm = bundle.getString("crypto.algorithm");
-            SymmetricKey sk = new SymmetricKey();
-            Decrypt decrypt = new Decrypt(sk.getKey(), algorithm);
-            password = decrypt.decryptString(password);
-        } catch (IOException | ClassNotFoundException | NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
-            System.out.println("ERROR SMTPAppenderEncryptPass: " + e.getMessage());
+        if ("[PROTECTED]".equals(password)) {
+            try {
+                ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
+                String algorithm = bundle.getString("crypto.algorithm");
+                password = bundle.getString("logback.password");
+                SymmetricKey sk = new SymmetricKey();
+                Decrypt decrypt = new Decrypt(sk.getKey(), algorithm);
+                password = decrypt.decryptString(password);
+            } catch (IOException | ClassNotFoundException | NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
+                System.out.println("ERROR SMTPAppenderEncryptPass: " + e.getMessage());
+            }
         }
         super.setPassword(password);
     }
