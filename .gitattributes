@@ -1,0 +1,1 @@
+src/main/resources/logback.xml filter=git-crypt diff=git-crypt

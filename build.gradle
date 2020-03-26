@@ -11,7 +11,28 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    logbackVersion = '1.2.3'
+    slf4jVersion = '1.7.30'
+    jsonVersion = '20171018'
+    junitVersion = '4.12'
+    activationVersion = '1.1.1'
+    mailVersion = '1.4.7'
+}
+
 dependencies {
-    compile 'org.json:json:20171018'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    // Log dependencies
+    compile "ch.qos.logback:logback-core:$logbackVersion"
+    compile "ch.qos.logback:logback-classic:$logbackVersion"
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+
+    // JSON dependencies
+    compile "org.json:json:$jsonVersion"
+
+    // JAVA mail
+    compile "javax.mail:mail:$mailVersion"
+    runtime "javax.activation:activation:$activationVersion"
+
+    // Unit test dependencies
+    testCompile "junit:junit:$junitVersion"
 }

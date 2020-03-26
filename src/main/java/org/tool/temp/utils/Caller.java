@@ -1,4 +1,4 @@
-package org.tool.checkin.utils;
+package org.tool.temp.utils;
 
 import org.json.JSONObject;
 
@@ -11,7 +11,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 public class Caller {
 
