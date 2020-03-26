@@ -1,8 +1,6 @@
 package org.tool.temp.logback;
 
 import ch.qos.logback.classic.net.SMTPAppender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tool.temp.crypto.Decrypt;
 import org.tool.temp.crypto.SymmetricKey;
 import org.tool.temp.utils.constants.Constants;
