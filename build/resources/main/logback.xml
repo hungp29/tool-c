@@ -20,7 +20,7 @@
     </appender>
 
     <!--  Send messages to Email  -->
-    <appender name="EMAIL" class="org.tool.c.logback.SMTPAppenderEncryptPass">
+    <appender name="EMAIL" class="org.tool.c.services.logback.SMTPAppenderEncryptPass">
         <smtpHost>smtp.gmail.com</smtpHost>
         <smtpPort>587</smtpPort>
         <STARTTLS>true</STARTTLS>

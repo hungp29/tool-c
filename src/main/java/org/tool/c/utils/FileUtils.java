@@ -1,6 +1,6 @@
 package org.tool.c.utils;
 
-import java.io.File;
+import java.io.*;
 
 /**
  * File utils.
@@ -34,5 +34,24 @@ public class FileUtils {
             }
         }
         return result;
+    }
+
+    /**
+     * Read data from input stream.
+     *
+     * @param is InputStream object
+     * @return
+     * @throws IOException
+     */
+    public static String readInputStream(InputStream is) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        String inputLine;
+        StringBuffer content = new StringBuffer();
+        while (null != (inputLine = br.readLine())) {
+            content.append(inputLine);
+        }
+        br.close();
+
+        return content.toString();
     }
 }
