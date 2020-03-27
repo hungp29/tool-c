@@ -1,11 +1,10 @@
-package org.tool.temp.crypto;
+package org.tool.c.crypto;
 
-import org.tool.temp.utils.FileUtils;
-import org.tool.temp.utils.constants.Constants;
+import org.tool.c.utils.FileUtils;
+import org.tool.c.utils.constants.Constants;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.ResourceBundle;
 

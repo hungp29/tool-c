@@ -20,7 +20,7 @@
     </appender>
 
     <!--  Send messages to Email  -->
-    <appender name="EMAIL" class="org.tool.temp.logback.SMTPAppenderEncryptPass">
+    <appender name="EMAIL" class="org.tool.c.logback.SMTPAppenderEncryptPass">
         <smtpHost>smtp.gmail.com</smtpHost>
         <smtpPort>587</smtpPort>
         <STARTTLS>true</STARTTLS>
@@ -54,12 +54,12 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="org.tool.temp.subapp.EncryptSubApp" additivity="false">
+    <logger name="org.tool.c.subapp.EncryptSubApp" additivity="false">
         <appender-ref ref="ENCRYPT_SUB_APP"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="org.tool.temp.Application" additivity="false">
+    <logger name="org.tool.c.Application" additivity="false">
         <appender-ref ref="APPLICATION"/>
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="EMAIL"/>

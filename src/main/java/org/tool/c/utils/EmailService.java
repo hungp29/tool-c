@@ -1,4 +1,4 @@
-package org.tool.temp.utils;
+package org.tool.c.utils;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -69,7 +69,7 @@ public class EmailService {
         }
     }
 
-//    public static void main(String ... args) {
-//        new EmailService("smtp.gmail.com", 587, "announce.hungpham@gmail.com", "112qwaszx!");
-//    }
+    public static void main(String ... args) {
+        new EmailService("smtp.gmail.com", 587, "announce.hungpham@gmail.com", "112qwaszx!");
+    }
 }
