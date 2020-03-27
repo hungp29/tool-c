@@ -36,3 +36,12 @@ dependencies {
     // Unit test dependencies
     testCompile "junit:junit:$junitVersion"
 }
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Main-Class': 'org.tool.c.Application'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
