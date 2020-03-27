@@ -12,6 +12,8 @@ import java.util.Map;
  */
 public class RestOperations {
 
+//    https://stackoverflow.com/questions/33084855/way-to-ignore-ssl-certificate-using-httpsurlconnection
+//    https://stackoverflow.com/questions/33067368/okhttp-trusting-certificate
     public <T> T getForObject(String url, HttpMethods httpMethod, Class<T> responseClass, Map<String, ?> data) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList("application/json"));

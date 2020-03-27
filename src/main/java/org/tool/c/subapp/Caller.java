@@ -1,6 +1,7 @@
 package org.tool.c.subapp;
 
 import org.json.JSONObject;
+import org.tool.c.services.http.HttpsTrustManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +19,7 @@ public class Caller {
         String u1 = "https://api.checkin.bap.jp/api/rpc";
         String u2 = "https://api.identity.bap.jp/api/rpc";
         URL url = new URL(u2);
+        HttpsTrustManager.allowAllSSL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");

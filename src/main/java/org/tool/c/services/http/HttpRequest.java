@@ -26,6 +26,7 @@ public class HttpRequest {
      * @param url url
      */
     public HttpRequest(String url) throws IOException {
+        HttpsTrustManager.allowAllSSL();
         conn = (HttpURLConnection) new URL(url).openConnection();
         conn.setDoOutput(true);
     }
@@ -144,9 +145,9 @@ public class HttpRequest {
      */
     public String getResponse() throws IOException {
         if (conn.getResponseCode() > 299) {
-            return FileUtils.readInputStream(conn.getInputStream());
-        } else {
             return FileUtils.readInputStream(conn.getErrorStream());
+        } else {
+            return FileUtils.readInputStream(conn.getInputStream());
         }
     }
 }
