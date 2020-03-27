@@ -30,7 +30,8 @@ public class Authentication {
         data.put("action", "get_oauth_token");
         data.put("grantType", "password");
         data.put("grantData", Arrays.asList("hungp@bap.jp", "112qwaszx!"));
-        restOperation.getForObject(url, HttpMethods.POST, String.class, data);
+        String a = restOperation.getForObject(url, HttpMethods.POST, String.class, data);
+        System.out.println(a);
         return "";
     }
 }

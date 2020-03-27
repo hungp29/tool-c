@@ -15,6 +15,7 @@ ext {
     logbackVersion = '1.2.3'
     slf4jVersion = '1.7.30'
     jsonVersion = '20171018'
+    jacksonVersion = '2.0.1'
     junitVersion = '4.12'
     activationVersion = '1.1.1'
     mailVersion = '1.4.7'
@@ -28,6 +29,7 @@ dependencies {
 
     // JSON dependencies
     compile "org.json:json:$jsonVersion"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 
     // JAVA mail
     compile "javax.mail:mail:$mailVersion"

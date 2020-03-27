@@ -26,6 +26,9 @@ public class HttpRequest {
      * @param url url
      */
     public HttpRequest(String url) throws IOException {
+        // https://stackoverflow.com/questions/33084855/way-to-ignore-ssl-certificate-using-httpsurlconnection
+        // https://stackoverflow.com/questions/33067368/okhttp-trusting-certificate
+        // https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
         HttpsTrustManager.allowAllSSL();
         conn = (HttpURLConnection) new URL(url).openConnection();
         conn.setDoOutput(true);
