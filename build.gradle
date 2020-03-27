@@ -39,7 +39,7 @@ dependencies {
 
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'Gradle Jar File Example',
+        attributes 'Implementation-Title': 'Tool C',
                 'Main-Class': 'org.tool.c.Application'
     }
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }

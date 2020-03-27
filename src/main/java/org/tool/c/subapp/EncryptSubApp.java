@@ -23,7 +23,7 @@ public class EncryptSubApp {
 
     public static void main(String[] args) {
         try {
-            String data = "112qwaszx!"; // Define value to encrypt here.
+            String data = ""; // Define value to encrypt here.
 
             ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
             String algorithm = bundle.getString("crypto.algorithm");

@@ -20,7 +20,7 @@
     </appender>
 
     <!--  Send messages to Email  -->
-    <appender name="EMAIL" class="org.tool.temp.logback.SMTPAppenderEncryptPass">
+    <appender name="EMAIL" class="org.tool.c.logback.SMTPAppenderEncryptPass">
         <smtpHost>smtp.gmail.com</smtpHost>
         <smtpPort>587</smtpPort>
         <STARTTLS>true</STARTTLS>
@@ -33,7 +33,7 @@
         <layout class="ch.qos.logback.classic.html.HTMLLayout"/>
     </appender>
 
-    <!--  Send message to file for Encrypt  -->
+    <!--  Send messages to file for Encrypt  -->
     <appender name="ENCRYPT_SUB_APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder>
             <charset>utf-8</charset>
@@ -44,6 +44,7 @@
         </rollingPolicy>
     </appender>
 
+    <!--  Send messages to file for Application  -->
     <appender name="APPLICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder>
             <charset>utf-8</charset>
@@ -54,12 +55,12 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="org.tool.temp.subapp.EncryptSubApp" additivity="false">
+    <logger name="org.tool.c.subapp.EncryptSubApp" additivity="false">
         <appender-ref ref="ENCRYPT_SUB_APP"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="org.tool.temp.Application" additivity="false">
+    <logger name="org.tool.c.Application" additivity="false">
         <appender-ref ref="APPLICATION"/>
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="EMAIL"/>
