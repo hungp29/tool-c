@@ -3,6 +3,7 @@ package org.tool.c.services.logback;
 import ch.qos.logback.classic.net.SMTPAppender;
 import org.tool.c.services.crypto.Decrypt;
 import org.tool.c.services.crypto.SymmetricKey;
+import org.tool.c.utils.CryptoUtils;
 import org.tool.c.utils.constants.Constants;
 
 import javax.crypto.BadPaddingException;
@@ -24,11 +25,7 @@ public class SMTPAppenderEncryptPass extends SMTPAppender {
         if ("[PROTECTED]".equals(password)) {
             try {
                 ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
-                String algorithm = bundle.getString("crypto.algorithm");
-                password = bundle.getString("logback.password");
-                SymmetricKey sk = new SymmetricKey();
-                Decrypt decrypt = new Decrypt(sk.getKey(), algorithm);
-                password = decrypt.decryptString(password);
+                password = CryptoUtils.decryptString(bundle.getString("crypto.algorithm"), bundle.getString("logback.password"));
             } catch (IOException | ClassNotFoundException | NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
                 System.out.println("ERROR SMTPAppenderEncryptPass: " + e.getMessage());
             }

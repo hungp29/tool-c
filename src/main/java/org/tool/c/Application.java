@@ -1,72 +1,39 @@
 package org.tool.c;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tool.c.app.Authentication;
-import org.tool.c.services.http.HttpsTrustManager;
-import org.tool.c.subapp.Caller;
+import org.tool.c.app.authen.Authentication;
+import org.tool.c.app.authen.Token;
+import org.tool.c.app.claim.ClaimPresence;
+import org.tool.c.utils.constants.Constants;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ResourceBundle;
 
 public class Application {
 
     private static Logger LOG = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws IOException {
-//        LOG.error("test");
-        Authentication auth = new Authentication();
+        ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
+        String username = bundle.getString("tool.user.id");
+        String password = bundle.getString("tool.user.password");
+
         try {
-            auth.authenticate("hungp@bap.jp", "112qwaszx!");
-        } catch (IOException e) {
+            // Get authentication token
+            Authentication auth = new Authentication();
+            Token authToken = auth.authenticate(username, password);
+            String tokenAuth = authToken.getToken();
+
+            // Get Access token
+            Token accessToken = auth.getAccessToken(tokenAuth);
+            String tokenAccess = accessToken.getToken();
+
+            // Claim for Presence
+            ClaimPresence claimPresence = new ClaimPresence();
+            claimPresence.claim(tokenAccess);
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-
-//        Caller.doWithRequest();
-
-//        String u1 = "https://api.checkin.bap.jp/api/rpc";
-//        String u2 = "https://api.identity.bap.jp/api/rpc";
-//        URL url = new URL(u2);
-//        HttpsTrustManager.allowAllSSL();
-//        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//        conn.setDoOutput(true);
-//        conn.setRequestMethod("POST");
-//        conn.setRequestProperty("Content-Type", "application/json");
-//
-//        Map<String, Object> data = new HashMap<>();
-//        data.put("action", "get_oauth_token");
-//        data.put("grantType", "password");
-//        data.put("grantData", Arrays.asList("hungp@bap.jp", "112qwaszx!"));
-//        String input = "{\"action\": \"get_oauth_token\", \"grantType\": \"password\", \"grantData\": [\"hungp@bap.jp\", \"112qwaszx!\"]}";
-//
-//        JSONObject object = new JSONObject(data);
-//        System.out.println(object.toString());
-//        OutputStream os = conn.getOutputStream();
-//        os.write(input.getBytes());
-//        os.flush();
-//
-////            if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
-////                throw new RuntimeException("Failed : HTTP error code : "
-////                        + conn.getResponseCode());
-////            }
-//
-//        BufferedReader br = new BufferedReader(new InputStreamReader(
-//                (conn.getInputStream())));
-//
-//        String output;
-//        System.out.println("Output from Server .... \n");
-//        while ((output = br.readLine()) != null) {
-//            System.out.println(output);
-//        }
-//
-//        conn.disconnect();
     }
 }

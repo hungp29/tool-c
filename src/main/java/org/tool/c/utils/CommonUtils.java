@@ -1,5 +1,8 @@
 package org.tool.c.utils;
 
+import org.tool.c.exception.ErrorResponseException;
+import org.tool.c.services.http.ResponseEntity;
+
 import java.util.Map;
 
 /**
@@ -41,5 +44,20 @@ public class CommonUtils {
      */
     public static boolean isEmpty(Map data) {
         return null == data || data.isEmpty();
+    }
+
+    /**
+     * Get object from response entity.
+     *
+     * @param responseEntity response entity
+     * @param <T>            wildcard of object
+     * @return object get from response entity
+     */
+    public static <T> T getObject(ResponseEntity<T> responseEntity) {
+        if (responseEntity.isStatus()) {
+            return responseEntity.getObject();
+        } else {
+            throw new ErrorResponseException();
+        }
     }
 }

@@ -5,6 +5,7 @@ import java.util.*;
 public class HttpHeaders implements Map<String, List<String>> {
 
     public static final String CONTENT_TYPE = "Content-Type";
+    public static final String Authorization = "Authorization";
 
     private final Map<String, List<String>> headers;
 

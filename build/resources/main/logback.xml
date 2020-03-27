@@ -63,7 +63,7 @@
     <logger name="org.tool.c.Application" additivity="false">
         <appender-ref ref="APPLICATION"/>
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="EMAIL"/>
+<!--        <appender-ref ref="EMAIL"/>-->
     </logger>
 
     <!--  Root configuration  -->

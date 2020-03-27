@@ -1,5 +1,6 @@
 package org.tool.c.services.http;
 
+import org.json.JSONObject;
 import org.tool.c.utils.CommonUtils;
 import org.tool.c.utils.FileUtils;
 
@@ -8,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -141,16 +143,29 @@ public class HttpRequest {
     }
 
     /**
-     * Get Response.
+     * Get Response as string.
      *
      * @return response
      * @throws IOException
      */
-    public String getResponse() throws IOException {
+    public String getResponseString() throws IOException {
         if (conn.getResponseCode() > 299) {
             return FileUtils.readInputStream(conn.getErrorStream());
         } else {
             return FileUtils.readInputStream(conn.getInputStream());
         }
+    }
+
+    /**
+     * Put data to request and send it.
+     *
+     * @param data data
+     * @throws IOException
+     */
+    public void send(Map<String, ?> data) throws IOException {
+        JSONObject object = new JSONObject(data);
+        OutputStream os = conn.getOutputStream();
+        os.write(object.toString().getBytes());
+        os.flush();
     }
 }
