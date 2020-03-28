@@ -5,7 +5,7 @@ import org.tool.c.services.http.ResponseEntity;
 import org.tool.c.services.http.RestOperations;
 import org.tool.c.utils.CommonUtils;
 import org.tool.c.utils.CryptoUtils;
-import org.tool.c.utils.constants.ActionConstants;
+import org.tool.c.utils.constants.Actions;
 import org.tool.c.utils.constants.Constants;
 
 import javax.crypto.BadPaddingException;
@@ -14,10 +14,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Authentication class.
@@ -39,12 +36,12 @@ public class Authentication {
 
         RestOperations restOperation = new RestOperations();
         Map<String, Object> data = new HashMap<>();
-        data.put("action", ActionConstants.GET_OAUTH_TOKEN);
+        data.put("action", Actions.GET_OAUTH_TOKEN);
         data.put("grantType", "password");
         data.put("grantData", Arrays.asList(username, CryptoUtils.decryptString(algorithm, password)));
         ResponseEntity<Token> responseEntity = restOperation.getForObject(url, HttpMethods.POST, Token.class, data);
 
-        return CommonUtils.getObject(responseEntity);
+        return CommonUtils.getResponseObject(responseEntity);
     }
 
     /**
@@ -54,15 +51,93 @@ public class Authentication {
      * @return return access token
      * @throws IOException
      */
-    public Token getAccessToken(String loginToken) throws IOException {
+    public Token getAccessToken(String appUrl, String loginToken) throws IOException {
+        ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
+        String fieldNameAction = appUrl.equals(bundle.getString("tool.url.identity")) ? "action" : "action_name";
+        RestOperations restOperation = new RestOperations();
+        Map<String, Object> data = new HashMap<>();
+        data.put(fieldNameAction, Actions.GET_ACCESS_TOKEN);
+        data.put("loginToken", loginToken);
+        ResponseEntity<Token> responseEntity = restOperation.getForObject(appUrl, HttpMethods.POST, Token.class, data);
+
+        return CommonUtils.getResponseObject(responseEntity);
+    }
+
+    /**
+     * Get Oauth app.
+     *
+     * @param accessToken the access token
+     * @return value
+     */
+    public Map<String, ?> getOauthApp(String accessToken) throws IOException {
         ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
         String url = bundle.getString("tool.url.identity");
         RestOperations restOperation = new RestOperations();
         Map<String, Object> data = new HashMap<>();
-        data.put("action", ActionConstants.GET_ACCESS_TOKEN);
-        data.put("loginToken", loginToken);
-        ResponseEntity<Token> responseEntity = restOperation.getForObject(url, HttpMethods.POST, Token.class, data);
+        data.put("action", Actions.GET_OAUTH_APP);
+        data.put("id", 1);
+        data.put("info", Arrays.asList("id", "name", "callbackUrls"));
 
-        return CommonUtils.getObject(responseEntity);
+        ResponseEntity<Map> responseEntity = restOperation.getForObject(url, HttpMethods.POST, accessToken, Map.class, data);
+        return CommonUtils.getResponseObject(responseEntity);
+    }
+
+    /**
+     * Get code for oauth request.
+     *
+     * @param oauthAppMap Oauth app map
+     * @param accessToken access token
+     * @return code
+     * @throws IOException
+     */
+    public String getCodeOauthRequest(Map<String, ?> oauthAppMap, String accessToken) throws IOException {
+        ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
+        String url = bundle.getString("tool.url.identity");
+        RestOperations restOperation = new RestOperations();
+
+        // Prepare data
+        Condition condition = new Condition();
+        condition.setSubset(Arrays.asList("id", "username", "profilePhoto", "branchId", "branch"));
+        Scope scope = new Scope();
+        scope.setName("user.read");
+        scope.setCondition(condition);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("action", Actions.CREATE_OAUTH_REQUEST);
+        data.put("appId", oauthAppMap.get("id"));
+        data.put("userId", Integer.parseInt(bundle.getString("tool.user.id")));
+        data.put("scope", Arrays.asList(scope));
+        data.put("callbackUrl", CommonUtils.getValueFromArrayString((String) oauthAppMap.get("callbackUrls")));
+
+        ResponseEntity<Map> responseEntity = restOperation.getForObject(url, HttpMethods.POST, accessToken, Map.class, data);
+        Map<String, String> result = CommonUtils.getResponseObject(responseEntity);
+
+        if (!CommonUtils.isEmpty(result)) {
+            return result.get("code");
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Login to checkin app.
+     *
+     * @param oauthAppMap Oauth app data
+     * @param codeOauth   code for oauth
+     * @return user information, it include token data
+     * @throws IOException
+     */
+    public User loginCheckinApp(Map<String, ?> oauthAppMap, String codeOauth) throws IOException {
+        ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
+        String url = bundle.getString("tool.url.checkin");
+        RestOperations restOperation = new RestOperations();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("action_name", Actions.LOGIN);
+        data.put("grantType", "oauth");
+        data.put("grantData", Arrays.asList("identity", codeOauth, CommonUtils.getValueFromArrayString((String) oauthAppMap.get("callbackUrls"))));
+
+        ResponseEntity<User> responseEntity = restOperation.getForObject(url, HttpMethods.POST, User.class, data);
+        return CommonUtils.getResponseObject(responseEntity);
     }
 }

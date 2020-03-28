@@ -11,6 +11,10 @@ public class ErrorResponseException extends RuntimeException {
         super(MESSAGE);
     }
 
+    public ErrorResponseException(String message) {
+        super(message);
+    }
+
     public ErrorResponseException(Throwable err) {
         super(MESSAGE, err);
     }

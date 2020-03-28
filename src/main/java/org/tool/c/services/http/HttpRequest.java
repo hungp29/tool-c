@@ -20,7 +20,7 @@ public class HttpRequest {
     /**
      * Http URL connection.
      */
-    HttpURLConnection conn = null;
+    HttpURLConnection conn;
 
     /**
      * Constructor to new Http URL connection.

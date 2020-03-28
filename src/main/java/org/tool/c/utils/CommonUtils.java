@@ -53,11 +53,31 @@ public class CommonUtils {
      * @param <T>            wildcard of object
      * @return object get from response entity
      */
-    public static <T> T getObject(ResponseEntity<T> responseEntity) {
+    public static <T> T getResponseObject(ResponseEntity<T> responseEntity) {
         if (responseEntity.isStatus()) {
             return responseEntity.getObject();
         } else {
             throw new ErrorResponseException();
         }
+    }
+
+    /**
+     * Get status of response entity.
+     *
+     * @param responseEntity response entity
+     * @return status of response entity
+     */
+    public static boolean getReponseStatus(ResponseEntity responseEntity) {
+        return responseEntity.isStatus();
+    }
+
+    /**
+     * Get value from array string.
+     *
+     * @param arrayString array string
+     * @return value
+     */
+    public static String getValueFromArrayString(String arrayString) {
+        return arrayString.replace("[", "").replace("]", "").replace("\"", "");
     }
 }
