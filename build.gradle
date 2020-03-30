@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+}
+
+group 'org.tool'
+version '1.0.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    logbackVersion = '1.2.3'
+    slf4jVersion = '1.7.30'
+    jsonVersion = '20171018'
+    jacksonVersion = '2.10.3'
+    junitVersion = '4.12'
+    activationVersion = '1.1.1'
+    mailVersion = '1.4.7'
+}
+
+dependencies {
+    // Log dependencies
+    compile "ch.qos.logback:logback-core:$logbackVersion"
+    compile "ch.qos.logback:logback-classic:$logbackVersion"
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+
+    // JSON dependencies
+    compile "org.json:json:$jsonVersion"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
+
+    // JAVA mail
+    compile "javax.mail:mail:$mailVersion"
+    runtime "javax.activation:activation:$activationVersion"
+
+    // Unit test dependencies
+    testCompile "junit:junit:$junitVersion"
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Tool C',
+                'Main-Class': 'org.tool.c.Application'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}

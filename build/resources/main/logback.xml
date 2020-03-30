@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="120 seconds">
+    <!--  Log path  -->
+    <property name="LOG_PATH" value="./logs"/>
+
+    <property name="PATTERN_LAYOUT" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %t %logger{10} :: %m%n"/>
+    <property name="PATTERN_LAYOUT_PID" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %t ___PID___ %logger{10} :: %m%n"/>
+    <property name="PATTERN_MASK" value="false"/>
+    <property name="MAX_HISTORY" value="50"/>
+    <property name="MAX_FILE_SIZE" value="50MB"/>
+    <property name="TOTAL_SIZE_CAP" value="2048MB"/>
+    <timestamp key="BY_DATE" datePattern="yyyy-MM-dd"/>
+
+    <!-- Send messages to System.out -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN_LAYOUT}</pattern>
+        </encoder>
+    </appender>
+
+    <!--  Send messages to Email  -->
+    <appender name="EMAIL" class="org.tool.c.services.logback.SMTPAppenderEncryptPass">
+        <smtpHost>smtp.gmail.com</smtpHost>
+        <smtpPort>587</smtpPort>
+        <STARTTLS>true</STARTTLS>
+        <asynchronousSending>false</asynchronousSending>
+        <username>announce.hungpham@gmail.com</username>
+        <password>[PROTECTED]</password>
+        <to>hung.phamqk@gmail.com</to>
+        <from>announce.hungpham@gmail.com</from>
+        <subject>[ERROR] TOOL-C: %m - %d{yyyy-MM-dd HH:mm:ss.SSS}</subject>
+        <layout class="ch.qos.logback.classic.html.HTMLLayout"/>
+    </appender>
+
+    <!--  Send messages to file for Encrypt  -->
+    <appender name="ENCRYPT_SUB_APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <charset>utf-8</charset>
+            <pattern>${PATTERN_LAYOUT}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/encrypt-%d{yyyy-MM-dd_HH}.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <!--  Send messages to file for Application  -->
+    <appender name="APPLICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <charset>utf-8</charset>
+            <pattern>${PATTERN_LAYOUT}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/app-%d{yyyy-MM-dd_HH}.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="org.tool.c.subapp.EncryptSubApp" additivity="false">
+        <appender-ref ref="ENCRYPT_SUB_APP"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="org.tool.c.Application" additivity="false">
+        <appender-ref ref="APPLICATION"/>
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="EMAIL"/>
+    </logger>
+
+    <!--  Root configuration  -->
+    <!--    <root level="debug">-->
+    <!--        <appender-ref ref="STDOUT"/>-->
+    <!--        <appender-ref ref="EMAIL"/>-->
+    <!--    </root>-->
+</configuration>
