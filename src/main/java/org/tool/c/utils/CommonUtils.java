@@ -3,6 +3,9 @@ package org.tool.c.utils;
 import org.tool.c.exception.ErrorResponseException;
 import org.tool.c.services.http.ResponseEntity;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Map;
 
 /**
@@ -79,5 +82,15 @@ public class CommonUtils {
      */
     public static String getValueFromArrayString(String arrayString) {
         return arrayString.replace("[", "").replace("]", "").replace("\"", "");
+    }
+
+    /**
+     * Convert date time to system timezone.
+     *
+     * @param dateTime date time need to convert
+     * @return date time has converted
+     */
+    public LocalDateTime convertToSystemTimeZone(LocalDateTime dateTime) {
+        return dateTime.atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
     }
 }

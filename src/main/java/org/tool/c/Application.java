@@ -6,11 +6,16 @@ import org.tool.c.app.authen.Authentication;
 import org.tool.c.app.authen.Token;
 import org.tool.c.app.authen.User;
 import org.tool.c.app.claim.ClaimPresence;
+import org.tool.c.app.claim.TimeSheet;
+import org.tool.c.utils.EmailService;
 import org.tool.c.utils.constants.Constants;
 
 import java.io.IOException;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Application {
 
@@ -48,9 +53,44 @@ public class Application {
             String tokenAccessCheckin = accessTokenCheckin.getToken();
             System.out.println("Checkin: " + tokenAccessCheckin);
 
-            // Claim for Presence
+
             ClaimPresence claimPresence = new ClaimPresence();
-            claimPresence.claim(tokenAccessCheckin);
+
+            // Get personal time sheet
+            List<TimeSheet> timeSheets = claimPresence.getPersonalTimeSheet(tokenAccessCheckin);
+            TimeSheet currentTimeSheet = claimPresence.getCurrentTimeSheet(timeSheets);
+
+            if (null == currentTimeSheet) {
+                // Checkin
+                boolean success = claimPresence.claim(tokenAccessCheckin);
+
+                if (success) {
+                    LOG.info("Claim IN successfully");
+                    EmailService emailService = new EmailService();
+                    emailService.sendAnnouncement("hung.phamqk@gmail.com", "[INFO] TOOL-C: Check In successfully", "");
+                }
+            } else {
+                boolean isOutWorkingTime = claimPresence.checkIsOutWorkTime(currentTimeSheet);
+                if (isOutWorkingTime) {
+                    long timeSleep = ThreadLocalRandom.current().nextLong(1, 60 * 1000);
+                    LOG.info("Sleep: " + timeSleep);
+                    Thread.sleep(timeSleep);
+                    // Checkout
+                    boolean success = claimPresence.claim(tokenAccessCheckin);
+
+                    if (success) {
+                        LOG.info("Claim OUT successfully " + LocalTime.now());
+                        EmailService emailService = new EmailService();
+                        emailService.sendAnnouncement("hung.phamqk@gmail.com", "[INFO] TOOL-C: Check Out successfully", "");
+                    }
+                }
+                System.out.println(isOutWorkingTime);
+            }
+
+
+//            if (success) {
+//                LOG.info("CLAIM SUCCESS");
+//            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
