@@ -84,7 +84,7 @@ public class Application {
                         emailService.sendAnnouncement("hung.phamqk@gmail.com", "[INFO] TOOL-C: Check Out successfully", "");
                     }
                 }
-                System.out.println(isOutWorkingTime);
+                LOG.info("OUT OF WOKRING TIME: " + isOutWorkingTime);
             }
 
 
