@@ -1,6 +1,7 @@
 package org.tool.c.services.logback;
 
 import ch.qos.logback.classic.net.SMTPAppender;
+import org.tool.c.exception.CryptoException;
 import org.tool.c.services.crypto.Decrypt;
 import org.tool.c.services.crypto.SymmetricKey;
 import org.tool.c.utils.CryptoUtils;
@@ -26,7 +27,7 @@ public class SMTPAppenderEncryptPass extends SMTPAppender {
             try {
                 ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
                 password = CryptoUtils.decryptString(bundle.getString("crypto.algorithm"), bundle.getString("logback.password"));
-            } catch (IOException | ClassNotFoundException | NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
+            } catch (CryptoException e) {
                 System.out.println("ERROR SMTPAppenderEncryptPass: " + e.getMessage());
             }
         }

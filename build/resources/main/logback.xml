@@ -60,15 +60,15 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="org.tool.c.Application" additivity="false">
+    <logger name="org.tool.c.Application">
         <appender-ref ref="APPLICATION"/>
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="EMAIL"/>
     </logger>
 
     <!--  Root configuration  -->
-    <!--    <root level="debug">-->
+        <root level="debug">
     <!--        <appender-ref ref="STDOUT"/>-->
-    <!--        <appender-ref ref="EMAIL"/>-->
-    <!--    </root>-->
+            <appender-ref ref="EMAIL"/>
+        </root>
 </configuration>

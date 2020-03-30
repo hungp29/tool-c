@@ -1,4 +1,4 @@
-package org.tool.c.app.authen;
+package org.tool.c.app.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

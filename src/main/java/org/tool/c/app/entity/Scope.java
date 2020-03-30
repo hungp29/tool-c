@@ -1,4 +1,4 @@
-package org.tool.c.app.authen;
+package org.tool.c.app.entity;
 
 public class Scope {
 

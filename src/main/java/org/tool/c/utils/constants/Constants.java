@@ -14,4 +14,6 @@ public class Constants {
     public static final String BUNDLE_APPLICATION = "application";
 
     public static final String TIMEZONE = "UTC";
+
+    public static final String EMPTY = "";
 }
