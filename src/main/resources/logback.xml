@@ -67,8 +67,8 @@
     </logger>
 
     <!--  Root configuration  -->
-        <root level="debug">
+    <!--        <root level="debug">-->
     <!--        <appender-ref ref="STDOUT"/>-->
-            <appender-ref ref="EMAIL"/>
-        </root>
+    <!--            <appender-ref ref="EMAIL"/>-->
+    <!--        </root>-->
 </configuration>

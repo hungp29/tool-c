@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tool.c.subapp.CheckinApp;
 
-import java.io.IOException;
-
 /**
  * Main application.
  */

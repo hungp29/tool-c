@@ -1,6 +1,7 @@
 package org.tool.c.services.http;
 
 import org.json.JSONObject;
+import org.tool.c.exception.*;
 import org.tool.c.utils.CommonUtils;
 import org.tool.c.utils.FileUtils;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Set;
@@ -27,13 +29,17 @@ public class HttpRequest {
      *
      * @param url url
      */
-    public HttpRequest(String url) throws IOException {
+    public HttpRequest(String url) {
         // https://stackoverflow.com/questions/33084855/way-to-ignore-ssl-certificate-using-httpsurlconnection
         // https://stackoverflow.com/questions/33067368/okhttp-trusting-certificate
         // https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
-        HttpsTrustManager.allowAllSSL();
-        conn = (HttpURLConnection) new URL(url).openConnection();
-        conn.setDoOutput(true);
+        try {
+            HttpsTrustManager.allowAllSSL();
+            conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setDoOutput(true);
+        } catch (IOException e) {
+            throw new RequestConnectionException(url, e);
+        }
     }
 
     /**
@@ -41,11 +47,15 @@ public class HttpRequest {
      *
      * @param url           url
      * @param requestMethod request method
-     * @throws IOException
      */
-    public HttpRequest(String url, HttpMethods requestMethod) throws IOException {
+    public HttpRequest(String url, HttpMethods requestMethod) {
         this(url);
-        conn.setRequestMethod(requestMethod.getCode());
+
+        try {
+            conn.setRequestMethod(requestMethod.getCode());
+        } catch (ProtocolException e) {
+            throw new RequestMethodException(requestMethod.getCode(), e);
+        }
     }
 
     /**
@@ -106,39 +116,47 @@ public class HttpRequest {
      * Get response code.
      *
      * @return response code
-     * @throws IOException
      */
-    public int getResponseCode() throws IOException {
-        return conn.getResponseCode();
+    public int getResponseCode() {
+        try {
+            return conn.getResponseCode();
+        } catch (IOException e) {
+            throw new ResponseCodeException();
+        }
     }
 
     /**
      * Get output stream.
      *
      * @return output stream
-     * @throws IOException
      */
-    public OutputStream getOutputStream() throws IOException {
-        return conn.getOutputStream();
+    public OutputStream getOutputStream() {
+        try {
+            return conn.getOutputStream();
+        } catch (IOException e) {
+            throw new RequestIOStreamException(e);
+        }
     }
 
     /**
      * Get input stream.
      *
      * @return input stream
-     * @throws IOException
      */
-    public InputStream getInputStream() throws IOException {
-        return conn.getInputStream();
+    public InputStream getInputStream() {
+        try {
+            return conn.getInputStream();
+        } catch (IOException e) {
+            throw new RequestIOStreamException(e);
+        }
     }
 
     /**
      * Get error stream.
      *
      * @return error stream
-     * @throws IOException
      */
-    public InputStream getErrorStream() throws IOException {
+    public InputStream getErrorStream() {
         return conn.getErrorStream();
     }
 
@@ -146,13 +164,12 @@ public class HttpRequest {
      * Get Response as string.
      *
      * @return response
-     * @throws IOException
      */
-    public String getResponseString() throws IOException {
-        if (conn.getResponseCode() > 299) {
-            return FileUtils.readInputStream(conn.getErrorStream());
+    public String getResponseString() {
+        if (getResponseCode() > 299) {
+            return FileUtils.readInputStream(getErrorStream());
         } else {
-            return FileUtils.readInputStream(conn.getInputStream());
+            return FileUtils.readInputStream(getInputStream());
         }
     }
 
@@ -160,12 +177,15 @@ public class HttpRequest {
      * Put data to request and send it.
      *
      * @param data data
-     * @throws IOException
      */
-    public void send(Map<String, ?> data) throws IOException {
-        JSONObject object = new JSONObject(data);
-        OutputStream os = conn.getOutputStream();
-        os.write(object.toString().getBytes());
-        os.flush();
+    public void send(Map<String, ?> data) {
+        try {
+            JSONObject object = new JSONObject(data);
+            OutputStream os = getOutputStream();
+            os.write(object.toString().getBytes());
+            os.flush();
+        } catch (IOException e) {
+            throw new RequestSendDataException(e);
+        }
     }
 }

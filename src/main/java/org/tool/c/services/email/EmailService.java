@@ -26,7 +26,7 @@ public class EmailService {
     private String username = "";
     private String password = "";
 
-    public EmailService() throws CryptoException {
+    public EmailService() {
         ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
         this.host = bundle.getString("email.announcement.host");
         this.port = Integer.parseInt(bundle.getString("email.announcement.port"));

@@ -90,7 +90,22 @@ public class CommonUtils {
      * @param dateTime date time need to convert
      * @return date time has converted
      */
-    public LocalDateTime convertToSystemTimeZone(LocalDateTime dateTime) {
+    public static LocalDateTime convertToSystemTimeZone(LocalDateTime dateTime) {
         return dateTime.atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    /**
+     * Replace string by position.
+     *
+     * @param message pattern
+     * @param values  values
+     * @return string
+     */
+    public static String replace(String message, String... values) {
+        int index = 0;
+        for (String value : values) {
+            message = message.replaceAll("\\{" + index++ + "\\}", value);
+        }
+        return message;
     }
 }

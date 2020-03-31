@@ -33,17 +33,15 @@ public class CryptoUtils {
      * @param encryptData encrypt data need to decrypt
      * @param algorithm   algorithm
      * @return decrypt value
-     * @throws CryptoException wrap for IOException, ClassNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, InvalidKeyException, IllegalBlockSizeException
      */
-    public static String decryptString(String algorithm, String encryptData) throws CryptoException {
+    public static String decryptString(String algorithm, String encryptData) {
         String decryptValue;
         try {
             SymmetricKey sk = new SymmetricKey();
-            Decrypt decrypt = new Decrypt(null, algorithm);
+            Decrypt decrypt = new Decrypt(sk.getKey(), algorithm);
             decryptValue = decrypt.decryptString(encryptData);
         } catch (IOException | ClassNotFoundException | NoSuchPaddingException | NoSuchAlgorithmException |
                 BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
-            LOG.error(e.getMessage(), e);
             throw new CryptoException(e.getMessage(), e);
         }
         return decryptValue;

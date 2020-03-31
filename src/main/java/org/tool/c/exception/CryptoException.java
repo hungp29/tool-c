@@ -3,7 +3,7 @@ package org.tool.c.exception;
 /**
  * Crypto Exception.
  */
-public class CryptoException extends Exception {
+public class CryptoException extends RuntimeException {
 
     public static final String CRYPTO_ERROR_MESSAGE = "Encryption / Decryption process has encountered an error";
 

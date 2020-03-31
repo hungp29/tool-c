@@ -5,22 +5,17 @@ import org.tool.c.app.entity.Scope;
 import org.tool.c.app.entity.Token;
 import org.tool.c.app.entity.User;
 import org.tool.c.base.Base;
-import org.tool.c.exception.CryptoException;
 import org.tool.c.services.http.HttpMethods;
 import org.tool.c.services.http.ResponseEntity;
 import org.tool.c.services.http.RestOperations;
 import org.tool.c.utils.CommonUtils;
 import org.tool.c.utils.CryptoUtils;
 import org.tool.c.utils.constants.Actions;
-import org.tool.c.utils.constants.Constants;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Authentication class.
@@ -34,13 +29,16 @@ public class Authentication extends Base {
      * @param password password
      * @return Authentication Token
      */
-    public Token authenticate(String username, String password) throws IOException, CryptoException {
-
+    public Token authenticate(String username, String password) {
         RestOperations restOperation = new RestOperations();
+
+        // Prepare data for request
         Map<String, Object> data = new HashMap<>();
         data.put("action", Actions.GET_OAUTH_TOKEN);
         data.put("grantType", "password");
         data.put("grantData", Arrays.asList(username, CryptoUtils.decryptString(algorithm, password)));
+
+        // Send request to get response
         ResponseEntity<Token> responseEntity = restOperation.getForObject(identityUrl, HttpMethods.POST, Token.class, data);
 
         return CommonUtils.getResponseObject(responseEntity);
@@ -51,14 +49,17 @@ public class Authentication extends Base {
      *
      * @param loginToken login token
      * @return return access token
-     * @throws IOException
      */
-    public Token getAccessToken(String appUrl, String loginToken) throws IOException {
+    public Token getAccessToken(String appUrl, String loginToken) {
         String fieldNameAction = appUrl.equals(identityUrl) ? "action" : "action_name";
         RestOperations restOperation = new RestOperations();
+
+        // Prepare data for request
         Map<String, Object> data = new HashMap<>();
         data.put(fieldNameAction, Actions.GET_ACCESS_TOKEN);
         data.put("loginToken", loginToken);
+
+        // Send request to get response
         ResponseEntity<Token> responseEntity = restOperation.getForObject(appUrl, HttpMethods.POST, Token.class, data);
 
         return CommonUtils.getResponseObject(responseEntity);
@@ -70,14 +71,18 @@ public class Authentication extends Base {
      * @param accessToken the access token
      * @return value
      */
-    public Map<String, ?> getOauthApp(String accessToken) throws IOException {
+    public Map<String, ?> getOauthApp(String accessToken) {
         RestOperations restOperation = new RestOperations();
+
+        // Prepare data for request
         Map<String, Object> data = new HashMap<>();
         data.put("action", Actions.GET_OAUTH_APP);
         data.put("id", 1);
         data.put("info", Arrays.asList("id", "name", "callbackUrls"));
 
+        // Send request to get response
         ResponseEntity<Map> responseEntity = restOperation.getForObject(identityUrl, HttpMethods.POST, accessToken, Map.class, data);
+
         return CommonUtils.getResponseObject(responseEntity);
     }
 
