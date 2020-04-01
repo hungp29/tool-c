@@ -12,8 +12,8 @@ import org.tool.c.utils.CommonUtils;
 import org.tool.c.utils.CryptoUtils;
 import org.tool.c.utils.constants.Actions;
 
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,7 +71,7 @@ public class Authentication extends Base {
      * @param accessToken the access token
      * @return value
      */
-    public Map<String, ?> getOauthApp(String accessToken) {
+    public Map<String, String> getOauthApp(String accessToken) {
         RestOperations restOperation = new RestOperations();
 
         // Prepare data for request
@@ -81,7 +81,7 @@ public class Authentication extends Base {
         data.put("info", Arrays.asList("id", "name", "callbackUrls"));
 
         // Send request to get response
-        ResponseEntity<Map> responseEntity = restOperation.getForObject(identityUrl, HttpMethods.POST, accessToken, Map.class, data);
+        ResponseEntity<Map<String, String>> responseEntity = restOperation.getForMap(identityUrl, HttpMethods.POST, accessToken, String.class, data);
 
         return CommonUtils.getResponseObject(responseEntity);
     }
@@ -92,9 +92,8 @@ public class Authentication extends Base {
      * @param oauthAppMap Oauth app map
      * @param accessToken access token
      * @return code
-     * @throws IOException
      */
-    public String getCodeOauthRequest(Map<String, ?> oauthAppMap, String accessToken) throws IOException {
+    public String getCodeOauthRequest(Map<String, String> oauthAppMap, String accessToken) {
         RestOperations restOperation = new RestOperations();
 
         // Prepare data
@@ -108,10 +107,10 @@ public class Authentication extends Base {
         data.put("action", Actions.CREATE_OAUTH_REQUEST);
         data.put("appId", oauthAppMap.get("id"));
         data.put("userId", Integer.parseInt(bundle.getString("tool.user.id")));
-        data.put("scope", Arrays.asList(scope));
+        data.put("scope", Collections.singletonList(scope));
         data.put("callbackUrl", CommonUtils.getValueFromArrayString((String) oauthAppMap.get("callbackUrls")));
 
-        ResponseEntity<Map> responseEntity = restOperation.getForObject(identityUrl, HttpMethods.POST, accessToken, Map.class, data);
+        ResponseEntity<Map<String, String>> responseEntity = restOperation.getForMap(identityUrl, HttpMethods.POST, accessToken, String.class, data);
         Map<String, String> result = CommonUtils.getResponseObject(responseEntity);
 
         if (!CommonUtils.isEmpty(result)) {
@@ -127,9 +126,8 @@ public class Authentication extends Base {
      * @param oauthAppMap Oauth app data
      * @param codeOauth   code for oauth
      * @return user information, it include token data
-     * @throws IOException
      */
-    public User loginCheckinApp(Map<String, ?> oauthAppMap, String codeOauth) throws IOException {
+    public User loginCheckinApp(Map<String, ?> oauthAppMap, String codeOauth) {
         RestOperations restOperation = new RestOperations();
 
         Map<String, Object> data = new HashMap<>();

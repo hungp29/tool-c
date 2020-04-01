@@ -70,7 +70,7 @@ public class CommonUtils {
      * @param responseEntity response entity
      * @return status of response entity
      */
-    public static boolean getReponseStatus(ResponseEntity responseEntity) {
+    public static boolean getResponseStatus(ResponseEntity responseEntity) {
         return responseEntity.isStatus();
     }
 

@@ -42,7 +42,7 @@ public class CheckinApp {
         String tokenAccessIdentity = accessTokenIdentity.getToken();
 
         // Get oath app
-        Map<String, ?> oauthAppMap = auth.getOauthApp(tokenAccessIdentity);
+        Map<String, String> oauthAppMap = auth.getOauthApp(tokenAccessIdentity);
 
         // Get code for oauth checkin app
         String code = auth.getCodeOauthRequest(oauthAppMap, tokenAccessIdentity);

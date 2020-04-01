@@ -1,38 +1,36 @@
 package org.tool.c.app.action;
 
 import org.tool.c.app.entity.TimeSheet;
+import org.tool.c.base.Base;
 import org.tool.c.services.http.HttpMethods;
 import org.tool.c.services.http.ResponseEntity;
 import org.tool.c.services.http.RestOperations;
 import org.tool.c.utils.CommonUtils;
 import org.tool.c.utils.constants.Actions;
-import org.tool.c.utils.constants.Constants;
 
-import java.io.IOException;
-import java.time.*;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Claim for Presence.
  */
-public class ClaimPresence {
+public class ClaimPresence extends Base {
 
     /**
      * Get personal time sheet.
      *
      * @param accessToken access token for checkin app
      * @return list time sheet
-     * @throws IOException
      */
-    public List<TimeSheet> getPersonalTimeSheet(String accessToken) throws IOException {
-        ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
-        String url = bundle.getString("tool.url.checkin");
-
+    public List<TimeSheet> getPersonalTimeSheet(String accessToken) {
         RestOperations restOperation = new RestOperations();
         Map<String, Object> data = new HashMap<>();
         data.put("action_name", Actions.PERSONAL_TIMESHEET);
 
-        ResponseEntity<List<TimeSheet>> responseEntity = restOperation.getForListObject(url, HttpMethods.POST, accessToken, TimeSheet.class, data);
+        ResponseEntity<List<TimeSheet>> responseEntity = restOperation.getForListObject(checkinUrl, HttpMethods.POST, accessToken, TimeSheet.class, data);
         return CommonUtils.getResponseObject(responseEntity);
     }
 
@@ -54,18 +52,15 @@ public class ClaimPresence {
      *
      * @param accessToken Access token for checkin app
      * @return true if claim is successfully
-     * @throws IOException
      */
-    public boolean claim(String accessToken) throws IOException {
-        ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
-        String url = bundle.getString("tool.url.checkin");
-
+    public boolean claim(String accessToken) {
         RestOperations restOperation = new RestOperations();
         Map<String, Object> data = new HashMap<>();
         data.put("action_name", Actions.CLAIM_FOR_PRESENCE);
 
-        ResponseEntity<Map> responseEntity = restOperation.getForObject(url, HttpMethods.POST, accessToken, Map.class, data);
-        return CommonUtils.getReponseStatus(responseEntity);
+        ResponseEntity<TimeSheet> responseEntity = restOperation.getForObject(checkinUrl, HttpMethods.POST, accessToken, "checked", TimeSheet.class, data);
+
+        return CommonUtils.getResponseStatus(responseEntity);
     }
 
     /**
@@ -75,9 +70,7 @@ public class ClaimPresence {
      * @return true if it's out of working time
      */
     public boolean checkIsOutWorkTime(TimeSheet timeSheet) {
-        ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
         LocalTime endWorkTime = LocalTime.parse(bundle.getString("working.time.end"));
-
         return LocalTime.now().isAfter(endWorkTime);
     }
 }

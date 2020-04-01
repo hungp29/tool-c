@@ -5,7 +5,7 @@ import java.util.*;
 public class HttpHeaders implements Map<String, List<String>> {
 
     public static final String CONTENT_TYPE = "Content-Type";
-    public static final String Authorization = "Authorization";
+    public static final String AUTHORIZATION = "Authorization";
 
     private final Map<String, List<String>> headers;
 
@@ -102,5 +102,33 @@ public class HttpHeaders implements Map<String, List<String>> {
     @Override
     public int hashCode() {
         return this.headers.hashCode();
+    }
+
+    /**
+     * New HttpHeaders instance with context type.
+     *
+     * @param contextType the context type of request.
+     * @return HttpHeaders
+     */
+    public static HttpHeaders newInstance(String contextType) {
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, Arrays.asList(contextType));
+
+        return new HttpHeaders(headers, false);
+    }
+
+    /**
+     * New HttpHeaders instance with context type and authorization.
+     *
+     * @param contextType   the context type of request.
+     * @param authorization the access token
+     * @return HttpHeaders
+     */
+    public static HttpHeaders newInstanceAuth(String contextType, String authorization) {
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, Collections.singletonList(contextType));
+        headers.put(AUTHORIZATION, Collections.singletonList(authorization));
+
+        return new HttpHeaders(headers, false);
     }
 }
