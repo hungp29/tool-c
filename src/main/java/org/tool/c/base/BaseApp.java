@@ -13,6 +13,7 @@ public class BaseApp implements Serializable {
     protected String identityUrl;
     protected String checkinUrl;
     protected String receiveAnnouncement;
+    protected String announcementMultiTime;
 
     public BaseApp() {
         bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
@@ -21,5 +22,6 @@ public class BaseApp implements Serializable {
         identityUrl = bundle.getString("tool.url.identity");
         checkinUrl = bundle.getString("tool.url.checkin");
         receiveAnnouncement = bundle.getString("email.announcement.receive");
+        announcementMultiTime = bundle.getString("tool.user.announcement.multi-time");
     }
 }

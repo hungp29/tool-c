@@ -18,4 +18,8 @@ public class Constants {
     public static final String EMPTY = "";
 
     public static final String DATE_TIME_FM = "dd-MM-yyyy HH:mm:ss";
+
+    public static final String DATE_FM = "dd-MM-yyyy";
+
+    public static final String YES = "Y";
 }

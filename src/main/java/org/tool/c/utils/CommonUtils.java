@@ -8,10 +8,7 @@ import org.tool.c.utils.constants.Constants;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -153,6 +150,20 @@ public class CommonUtils {
             timeFormatted = time.format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FM));
         }
         return timeFormatted;
+    }
+
+    /**
+     * Format LocalDate to String.
+     *
+     * @param date date need to format
+     * @return time as string
+     */
+    public static String formatLocalDate(LocalDate date) {
+        String dateFormatted = Constants.EMPTY;
+        if (!isEmpty(date)) {
+            dateFormatted = date.format(DateTimeFormatter.ofPattern(Constants.DATE_FM));
+        }
+        return dateFormatted;
     }
 
     /**

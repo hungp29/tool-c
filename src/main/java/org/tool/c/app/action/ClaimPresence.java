@@ -9,6 +9,7 @@ import org.tool.c.utils.CommonUtils;
 import org.tool.c.utils.constants.Actions;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
@@ -66,11 +67,22 @@ public class ClaimPresence extends Base {
     /**
      * Check current time is out of working time.
      *
-     * @param timeSheet current timesheet
      * @return true if it's out of working time
      */
-    public boolean checkIsOutWorkTime(TimeSheet timeSheet) {
+    public boolean checkIsOutWorkTime() {
         LocalTime endWorkTime = LocalTime.parse(bundle.getString("working.time.afternoon.end"));
         return LocalTime.now().isAfter(endWorkTime);
+    }
+
+    /**
+     * Check status of checkout.
+     *
+     * @param timeSheet current time sheet
+     * @return true if we have checkout
+     */
+    public boolean isCheckOut(TimeSheet timeSheet) {
+        LocalTime endWorkTime = LocalTime.parse(bundle.getString("working.time.afternoon.end"));
+        LocalDateTime dateTimeEnd = LocalDateTime.of(LocalDate.now(), endWorkTime);
+        return !CommonUtils.isEmpty(timeSheet) && !CommonUtils.isEmpty(timeSheet.getCheckOutTime()) && !timeSheet.getCheckOutTime().isBefore(dateTimeEnd);
     }
 }

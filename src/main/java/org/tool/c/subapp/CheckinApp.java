@@ -11,6 +11,7 @@ import org.tool.c.base.BaseApp;
 import org.tool.c.services.email.EmailService;
 import org.tool.c.services.pattern.VelocityService;
 import org.tool.c.utils.CommonUtils;
+import org.tool.c.utils.constants.Constants;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -84,7 +85,7 @@ public class CheckinApp extends BaseApp {
                 emailService.sendAnnouncement(receiveAnnouncement, mail[0], mail[1]);
             }
         } else {
-            boolean isOutWorkingTime = claimPresence.checkIsOutWorkTime(currentTimeSheet);
+            boolean isOutWorkingTime = claimPresence.checkIsOutWorkTime();
             if (isOutWorkingTime) {
                 long timeSleep = ThreadLocalRandom.current().nextLong(1, 60 * 1000);
                 LOG.info("Sleep: " + timeSleep);
@@ -95,14 +96,19 @@ public class CheckinApp extends BaseApp {
                 if (null != timeSheet) {
                     Map<String, String> dataMail = prepareDataTimeSheet(timeSheet);
                     LOG.info("Checkout successfully " + dataMail.get("checkOutTime"));
-                    String[] mail = velocityService.mergeForMail("checkout-success", dataMail);
-                    EmailService emailService = new EmailService();
-                    emailService.sendAnnouncement(receiveAnnouncement, mail[0], mail[1]);
+
+                    if (Constants.YES.equals(announcementMultiTime)) {
+                        String[] mail = velocityService.mergeForMail("checkout-success", dataMail);
+                        EmailService emailService = new EmailService();
+                        emailService.sendAnnouncement(receiveAnnouncement, mail[0], mail[1]);
+                    }
                 }
             } else {
-                LOG.info("OUT OF WORKING TIME");
+                LOG.warn("IN WORKING TIME");
             }
         }
+
+        LOG.info("### END CHECKIN ###");
     }
 
     /**
@@ -115,6 +121,7 @@ public class CheckinApp extends BaseApp {
         Map<String, String> map = new HashMap<>();
         map.put("checkInTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckInTime())));
         map.put("checkOutTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckOutTime())));
+        map.put("workingDay", CommonUtils.formatLocalDate(timeSheet.getWorkDay()));
         map.put("workingHours", calcWorkingHours(timeSheet));
         return map;
     }
@@ -131,10 +138,14 @@ public class CheckinApp extends BaseApp {
         Duration duration = Duration.between(timeSheet.getCheckInTime(), timeSheet.getCheckOutTime());
         long millis = duration.toMillis() - ChronoUnit.MILLIS.between(endMorningWorkTime, startAfternoonWorkTime);
 
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+
         return String.format("%02d:%02d:%02d",
-                TimeUnit.MILLISECONDS.toHours(millis),
-                TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
-                TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+                hours,
+                minutes - TimeUnit.HOURS.toMinutes(hours),
+                seconds - TimeUnit.MINUTES.toSeconds(minutes));
     }
 
     /**
