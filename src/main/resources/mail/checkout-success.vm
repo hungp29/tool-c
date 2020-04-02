@@ -1,0 +1,3 @@
+<p>Total working time: <strong>${workingHours}</strong></p>
+<p>Checkin time: <strong>${checkInTime}</strong></p>
+<p>Checkoout time: <strong>${checkOutTime}</strong></p>

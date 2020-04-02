@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration scan="true" scanPeriod="120 seconds">
+
+    <!--    Load propeties-->
+    <property resource="application.properties"/>
+
     <!--  Log path  -->
     <property name="LOG_PATH" value="./logs"/>
 
@@ -45,7 +49,7 @@
     </appender>
 
     <!--  Send messages to file for Application  -->
-    <appender name="APPLICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="TOOL" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder>
             <charset>utf-8</charset>
             <pattern>${PATTERN_LAYOUT}</pattern>
@@ -55,20 +59,15 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="org.tool.c.subapp.EncryptSubApp" additivity="false">
+    <logger name="org.tool.c.subapp.EncryptSubApp" level="${logback.log.level}" additivity="false">
         <appender-ref ref="ENCRYPT_SUB_APP"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="org.tool.c.Application">
-        <appender-ref ref="APPLICATION"/>
-        <appender-ref ref="STDOUT"/>
-<!--        <appender-ref ref="EMAIL"/>-->
-    </logger>
-
     <!--  Root configuration  -->
-    <!--        <root level="debug">-->
-    <!--        <appender-ref ref="STDOUT"/>-->
-    <!--            <appender-ref ref="EMAIL"/>-->
-    <!--        </root>-->
+    <root level="${logback.log.level}">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="TOOL"/>
+        <appender-ref ref="EMAIL"/>
+    </root>
 </configuration>

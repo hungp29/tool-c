@@ -29,7 +29,7 @@ public class Authentication extends Base {
      * @param password password
      * @return Authentication Token
      */
-    public Token authenticate(String username, String password) {
+    public Token authenticateIdentity(String username, String password) {
         RestOperations restOperation = new RestOperations();
 
         // Prepare data for request

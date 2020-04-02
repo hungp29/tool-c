@@ -13,7 +13,7 @@ public class Application {
 
     public static void main(String[] args) {
         try {
-            CheckinApp.run();
+            CheckinApp.run(args);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }

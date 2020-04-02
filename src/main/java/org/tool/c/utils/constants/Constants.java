@@ -16,4 +16,6 @@ public class Constants {
     public static final String TIMEZONE = "UTC";
 
     public static final String EMPTY = "";
+
+    public static final String DATE_TIME_FM = "dd-MM-yyyy HH:mm:ss";
 }

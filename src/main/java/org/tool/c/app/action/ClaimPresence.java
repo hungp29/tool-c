@@ -51,16 +51,16 @@ public class ClaimPresence extends Base {
      * Claim for presence.
      *
      * @param accessToken Access token for checkin app
-     * @return true if claim is successfully
+     * @return TimeSheet if claim is successfully
      */
-    public boolean claim(String accessToken) {
+    public TimeSheet claim(String accessToken) {
         RestOperations restOperation = new RestOperations();
         Map<String, Object> data = new HashMap<>();
         data.put("action_name", Actions.CLAIM_FOR_PRESENCE);
 
         ResponseEntity<TimeSheet> responseEntity = restOperation.getForObject(checkinUrl, HttpMethods.POST, accessToken, "checked", TimeSheet.class, data);
 
-        return CommonUtils.getResponseStatus(responseEntity);
+        return CommonUtils.getResponseObject(responseEntity);
     }
 
     /**
@@ -70,7 +70,7 @@ public class ClaimPresence extends Base {
      * @return true if it's out of working time
      */
     public boolean checkIsOutWorkTime(TimeSheet timeSheet) {
-        LocalTime endWorkTime = LocalTime.parse(bundle.getString("working.time.end"));
+        LocalTime endWorkTime = LocalTime.parse(bundle.getString("working.time.afternoon.end"));
         return LocalTime.now().isAfter(endWorkTime);
     }
 }

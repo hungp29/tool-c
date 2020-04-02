@@ -7,92 +7,144 @@ import org.tool.c.app.action.ClaimPresence;
 import org.tool.c.app.entity.TimeSheet;
 import org.tool.c.app.entity.Token;
 import org.tool.c.app.entity.User;
+import org.tool.c.base.BaseApp;
 import org.tool.c.services.email.EmailService;
-import org.tool.c.utils.constants.Constants;
+import org.tool.c.services.pattern.VelocityService;
+import org.tool.c.utils.CommonUtils;
 
+import java.time.Duration;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Checkin app.
  */
-public class CheckinApp {
+public class CheckinApp extends BaseApp {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckinApp.class);
 
     /**
      * Checkin and Checkout.
      */
-    public void checkin() throws Exception {
-        ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
-        String username = bundle.getString("tool.user.username");
-        String password = bundle.getString("tool.user.password");
+    public void checkin() {
+        LOG.info("### START CHECKIN ###");
+        LOG.info("Username: " + toolUsername);
 
         // Get authentication token
         Authentication auth = new Authentication();
-        Token authToken = auth.authenticate(username, password);
+        Token authToken = auth.authenticateIdentity(toolUsername, toolPassword);
         String tokenAuth = authToken.getToken();
+        LOG.info("Get identity authentication token successful");
 
         // Get Access token
-        String urlIdentity = bundle.getString("tool.url.identity");
-        Token accessTokenIdentity = auth.getAccessToken(urlIdentity, tokenAuth);
+        Token accessTokenIdentity = auth.getAccessToken(identityUrl, tokenAuth);
         String tokenAccessIdentity = accessTokenIdentity.getToken();
+        LOG.info("Get identity access token successful");
 
         // Get oath app
         Map<String, String> oauthAppMap = auth.getOauthApp(tokenAccessIdentity);
+        LOG.info("Get Oauth App map successful");
 
         // Get code for oauth checkin app
         String code = auth.getCodeOauthRequest(oauthAppMap, tokenAccessIdentity);
+        LOG.info("Get Code Oauth successful");
 
         // Login to checkin app
         User user = auth.loginCheckinApp(oauthAppMap, code);
+        LOG.info("Login to checkin app by using Oauth Code successful");
 
         // Get Access token for checkin app
-        String urlCheckin = bundle.getString("tool.url.checkin");
-        Token accessTokenCheckin = auth.getAccessToken(urlCheckin, user.getTokenData().getToken());
+        Token accessTokenCheckin = auth.getAccessToken(checkinUrl, user.getTokenData().getToken());
         String tokenAccessCheckin = accessTokenCheckin.getToken();
+        LOG.info("Get access token for checkin app successfully");
 
         ClaimPresence claimPresence = new ClaimPresence();
 
         // Get personal time sheet
         List<TimeSheet> timeSheets = claimPresence.getPersonalTimeSheet(tokenAccessCheckin);
         TimeSheet currentTimeSheet = claimPresence.getCurrentTimeSheet(timeSheets);
+        LOG.info("Get list time sheet of user successful");
 
+        VelocityService velocityService = new VelocityService();
         if (null == currentTimeSheet) {
             // Checkin
-            boolean success = claimPresence.claim(tokenAccessCheckin);
+            TimeSheet timeSheet = claimPresence.claim(tokenAccessCheckin);
 
-            if (success) {
-                LOG.info("Claim IN successfully");
+            if (null != timeSheet) {
+                Map<String, String> dataMail = prepareDataTimeSheet(timeSheet);
+                LOG.info("Checkin successfully " + dataMail.get("checkInTime"));
+                String[] mail = velocityService.mergeForMail("checkin-success", dataMail);
                 EmailService emailService = new EmailService();
-                emailService.sendAnnouncement("hung.phamqk@gmail.com", "[INFO] TOOL-C: Check In successfully", "");
+                emailService.sendAnnouncement(receiveAnnouncement, mail[0], mail[1]);
             }
         } else {
             boolean isOutWorkingTime = claimPresence.checkIsOutWorkTime(currentTimeSheet);
             if (isOutWorkingTime) {
                 long timeSleep = ThreadLocalRandom.current().nextLong(1, 60 * 1000);
                 LOG.info("Sleep: " + timeSleep);
-//                    Thread.sleep(timeSleep);
+                CommonUtils.sleep(timeSleep);
                 // Checkout
-                boolean success = claimPresence.claim(tokenAccessCheckin);
+                TimeSheet timeSheet = claimPresence.claim(tokenAccessCheckin);
 
-                if (success) {
-                    LOG.info("Claim OUT successfully " + LocalTime.now());
+                if (null != timeSheet) {
+                    Map<String, String> dataMail = prepareDataTimeSheet(timeSheet);
+                    LOG.info("Checkout successfully " + dataMail.get("checkOutTime"));
+                    String[] mail = velocityService.mergeForMail("checkout-success", dataMail);
                     EmailService emailService = new EmailService();
-                    emailService.sendAnnouncement("hung.phamqk@gmail.com", "[INFO] TOOL-C: Check Out successfully", "");
+                    emailService.sendAnnouncement(receiveAnnouncement, mail[0], mail[1]);
                 }
+            } else {
+                LOG.info("OUT OF WORKING TIME");
             }
-            LOG.info("OUT OF WOKRING TIME: " + isOutWorkingTime);
         }
     }
 
     /**
-     * Run Checkin app.
+     * Prepare data time sheet to set mail template.
+     *
+     * @param timeSheet time sheet
+     * @return map data
      */
-    public static void run() throws Exception {
+    public Map<String, String> prepareDataTimeSheet(TimeSheet timeSheet) {
+        Map<String, String> map = new HashMap<>();
+        map.put("checkInTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckInTime())));
+        map.put("checkOutTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckOutTime())));
+        map.put("workingHours", calcWorkingHours(timeSheet));
+        return map;
+    }
+
+    /**
+     * Calculate working hours.
+     *
+     * @param timeSheet time sheet
+     * @return working hours after minis lunch time
+     */
+    private String calcWorkingHours(TimeSheet timeSheet) {
+        LocalTime endMorningWorkTime = LocalTime.parse(bundle.getString("working.time.morning.end"));
+        LocalTime startAfternoonWorkTime = LocalTime.parse(bundle.getString("working.time.afternoon.start"));
+        Duration duration = Duration.between(timeSheet.getCheckInTime(), timeSheet.getCheckOutTime());
+        long millis = duration.toMillis() - ChronoUnit.MILLIS.between(endMorningWorkTime, startAfternoonWorkTime);
+
+        return String.format("%02d:%02d:%02d",
+                TimeUnit.MILLISECONDS.toHours(millis),
+                TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+                TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+    }
+
+    /**
+     * Run Checkin app.
+     *
+     * @param args arguments
+     */
+    public static void run(String[] args) throws Exception {
+        // Print out all arguments
+        Arrays.asList(args).forEach(LOG::info);
         CheckinApp app = new CheckinApp();
         app.checkin();
     }
