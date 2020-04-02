@@ -1,6 +1,6 @@
 package org.tool.c.utils;
 
-import org.tool.c.exception.ReadDataInputStreamException;
+import org.tool.c.exception.ReadInputStreamException;
 
 import java.io.*;
 
@@ -49,7 +49,7 @@ public class FileUtils {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String inputLine;
-            StringBuffer content = new StringBuffer();
+            StringBuilder content = new StringBuilder();
             while (null != (inputLine = br.readLine())) {
                 content.append(inputLine);
             }
@@ -57,7 +57,7 @@ public class FileUtils {
 
             return content.toString();
         } catch (IOException e) {
-            throw new ReadDataInputStreamException(e);
+            throw new ReadInputStreamException(e);
         }
     }
 }

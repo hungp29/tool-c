@@ -6,16 +6,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tool.c.exception.ErrorResponseException;
-import org.tool.c.exception.ResponseConverterException;
-import org.tool.c.exception.ResponseTemplateUnsupportedException;
+import org.tool.c.exception.ConverterException;
+import org.tool.c.exception.ConverterUnsupportedException;
+import org.tool.c.exception.ResponseFailureException;
 import org.tool.c.services.http.ResponseTemplate;
 import org.tool.c.utils.CommonUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,8 +26,8 @@ public class JacksonConverter {
 
     private static Logger LOG = LoggerFactory.getLogger(JacksonConverter.class);
 
-    private static final String JAVA_TYPE_LIST = "LIST";
-    private static final String JAVA_TYPE_MAP = "MAP";
+    public static final String WRAP_CONTEXT_LIST = "LIST";
+    public static final String WRAP_CONTEXT_MAP = "MAP";
 
     private ObjectMapper objectMapper;
     private PropertyUtilsBean propertyUtilsBean;
@@ -78,108 +77,50 @@ public class JacksonConverter {
      * @param path         path to get object
      * @return object
      */
-    public Object read(Class<?> contextClass, InputStream body, AtomicReference<Throwable> cause, String path) {
+    public Object read(Class<?> contextClass, InputStream body, String path, AtomicReference<Throwable> cause) {
         JavaType javaType = this.getJavaType(contextClass);
-
-        if (this.validResponseTemplateClass(ResponseTemplate.class)) {
-            ResponseTemplate responseTemplate = (ResponseTemplate) readJavaType(this.getJavaType(ResponseTemplate.class), ResponseTemplate.class, body);
-
-            if (responseTemplate.isSuccess()) {
-                try {
-                    Object result = CommonUtils.isEmpty(path) ? responseTemplate.getResult() : propertyUtilsBean.getProperty(responseTemplate.getResult(), path);
-                    return this.convertJavaType(javaType, result);
-                } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                    throw new ResponseConverterException("Cannot get value of object from property " + path);
-                }
-            } else {
-                cause.set(new ErrorResponseException(responseTemplate.getError().getCode()));
-            }
-        } else {
-            throw new ResponseTemplateUnsupportedException("Convert do not support Response template class");
-        }
-        return null;
-
+        return this.readJavaType(javaType, body, path, cause);
     }
 
     /**
-     * Read data as List.
+     * Read object from input stream.
      *
-     * @param contextClass class of object
-     * @param body         Input Stream from response
-     * @param cause        store Error
-     * @return list of object
+     * @param contextClass    class of object
+     * @param body            input stream of request
+     * @param cause           to store error if response is failure
+     * @param path            path to get object
+     * @param wrapContextType Wrap context type
+     * @return object
      */
-    @SuppressWarnings("unchecked")
-    public List<Object> readAsList(Class<?> contextClass, InputStream body, AtomicReference<Throwable> cause) {
-        JavaType javaType = this.getJavaType(contextClass, JAVA_TYPE_LIST);
-
-        if (this.validResponseTemplateClass(ResponseTemplate.class)) {
-            ResponseTemplate responseTemplate = (ResponseTemplate) readJavaType(this.getJavaType(ResponseTemplate.class), ResponseTemplate.class, body);
-
-            if (responseTemplate.isSuccess()) {
-                List<?> lstData = this.convertResultToList(responseTemplate.getResult());
-                if (!CommonUtils.isEmpty(lstData)) {
-                    return (List<Object>) this.convertJavaType(javaType, lstData);
-                }
-            } else {
-                cause.set(new ErrorResponseException(responseTemplate.getError().getCode()));
-            }
-        } else {
-            throw new ResponseTemplateUnsupportedException("Convert do not support Response template class");
-        }
-        return null;
+    public Object read(Class<?> contextClass, InputStream body, String path, String wrapContextType, AtomicReference<Throwable> cause) {
+        JavaType javaType = this.getJavaType(contextClass, wrapContextType);
+        return this.readJavaType(javaType, body, path, cause);
     }
 
     /**
-     * Read data as Map.
+     * Read by JavaType.
      *
-     * @param body  Input Stream from response
-     * @param cause store Exception
-     * @return Map data
+     * @param javaType java type of object
+     * @param body     input stream
+     * @param path     path to get object
+     * @param cause    store exception
+     * @return object read from json
      */
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> readAsMap(Class<?> contextClass, InputStream body, AtomicReference<Throwable> cause) {
-        JavaType javaType = this.getJavaType(contextClass, JAVA_TYPE_MAP);
-
+    private Object readJavaType(JavaType javaType, InputStream body, String path, AtomicReference<Throwable> cause) {
         if (this.validResponseTemplateClass(ResponseTemplate.class)) {
-            ResponseTemplate responseTemplate = (ResponseTemplate) readJavaType(this.getJavaType(ResponseTemplate.class), ResponseTemplate.class, body);
+            ResponseTemplate responseTemplate = readResponseTemplate(body);
 
             if (responseTemplate.isSuccess()) {
-                return (Map<String, Object>) this.convertJavaType(javaType, responseTemplate.getResult());
+                Object result = this.getResultObject(responseTemplate, path);
+                return this.convertJavaType(javaType, result);
             } else {
-                cause.set(new ErrorResponseException(responseTemplate.getError().getCode()));
+                cause.set(new ResponseFailureException(responseTemplate.getError().getCode()));
             }
         } else {
-            throw new ResponseTemplateUnsupportedException("Convert do not support Response template class");
+            throw new ConverterUnsupportedException("Convert do not support Response Template class");
         }
         return null;
     }
-
-    /**
-     * Convert result to List.
-     * If it's List then just cast it.
-     * If it's Map and a first element of Map is List then cast it to List.
-     *
-     * @param result result need to convert to List
-     * @return List
-     */
-    private List<?> convertResultToList(Object result) {
-        List<?> resultConverted = null;
-        if (!CommonUtils.isEmpty(result)) {
-            if (List.class.isAssignableFrom(result.getClass())) {
-                resultConverted = (List<?>) result;
-            } else if (Map.class.isAssignableFrom(result.getClass())) {
-                Iterator<? extends Map.Entry<?, ?>> entryIterator = ((Map<?, ?>) result).entrySet().iterator();
-                Object valueFirstEntry = entryIterator.hasNext() ? entryIterator.next().getValue() : null;
-                if (null != valueFirstEntry && List.class.isAssignableFrom(valueFirstEntry.getClass())) {
-                    resultConverted = (List<?>) valueFirstEntry;
-                }
-            }
-        }
-        return resultConverted;
-    }
-
-//    private Map<String, Object> convertRes
 
     /**
      * Convert to object by JavaType.
@@ -193,37 +134,33 @@ public class JacksonConverter {
     }
 
     /**
-     * Read object from json by Java Type.
+     * Read Response template object from json by Java Type.
      *
-     * @param javaType     Java Type of object
-     * @param contextClass Class of object
-     * @param body         Input Stream of response
+     * @param body Input Stream of response
      * @return object is read from stream
      */
-    private Object readJavaType(JavaType javaType, Class<?> contextClass, InputStream body) {
+    private ResponseTemplate readResponseTemplate(InputStream body) {
         try {
-            if (null != contextClass) {
-                return this.objectMapper.readerWithView(contextClass).forType(javaType).readValue(body);
-            }
-            return this.objectMapper.readValue(body, javaType);
+            return this.objectMapper.readValue(body, ResponseTemplate.class);
         } catch (IOException e) {
-            throw new ResponseConverterException("An error occurs while converting json to object", e);
+            throw new ConverterException("An error occurs while converting json to object", e);
         }
     }
 
     /**
      * Get JavaType of class.
      *
-     * @param clazz class
-     * @param type  type collection
+     * @param clazz           class
+     * @param wrapContextType type collection
      * @return JavaType of class
      */
-    private JavaType getJavaType(Class<?> clazz, String type) {
+    private JavaType getJavaType(Class<?> clazz, String wrapContextType) {
         JavaType javaType = this.getJavaType(clazz);
-        switch (type) {
-            case JAVA_TYPE_LIST:
+        wrapContextType = CommonUtils.trim(wrapContextType);
+        switch (wrapContextType) {
+            case WRAP_CONTEXT_LIST:
                 return this.objectMapper.getTypeFactory().constructCollectionType(List.class, javaType);
-            case JAVA_TYPE_MAP:
+            case WRAP_CONTEXT_MAP:
                 return this.objectMapper.getTypeFactory().constructMapType(Map.class, this.getJavaType(String.class), javaType);
             default:
                 return javaType;
@@ -248,5 +185,20 @@ public class JacksonConverter {
      */
     private boolean validResponseTemplateClass(Class<?> responseTemplate) {
         return this.support(responseTemplate);
+    }
+
+    /**
+     * Get result object from response template.
+     *
+     * @param responseTemplate response template object
+     * @param path             path to get object
+     * @return result objece
+     */
+    private Object getResultObject(ResponseTemplate responseTemplate, String path) {
+        try {
+            return CommonUtils.isEmpty(path) ? responseTemplate.getResult() : propertyUtilsBean.getProperty(responseTemplate.getResult(), path);
+        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            throw new ConverterException("Cannot get result object from Response Template object with path: " + path, e);
+        }
     }
 }

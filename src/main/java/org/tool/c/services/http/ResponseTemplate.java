@@ -2,6 +2,9 @@ package org.tool.c.services.http;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * Response Template class.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ResponseTemplate {
 

@@ -73,10 +73,8 @@ public class EmailService {
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(subject);
 
-            String msg = content;
-
             MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setContent(msg, "text/html");
+            mimeBodyPart.setContent(content, "text/html");
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(mimeBodyPart);
 

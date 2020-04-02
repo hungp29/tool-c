@@ -1,7 +1,7 @@
 package org.tool.c.services.http;
 
-import org.tool.c.exception.ConverterUnsupportedJavaTypeException;
-import org.tool.c.exception.ErrorResponseException;
+import org.tool.c.exception.ConverterUnsupportedException;
+import org.tool.c.exception.ResponseFailureException;
 import org.tool.c.services.http.converter.JacksonConverter;
 
 import java.io.InputStream;
@@ -113,7 +113,7 @@ public class RestOperations {
         request.setHeaders(headers);
         request.send(data);
 
-        return extractResponseAsList(request.getInputStream(), responseClass);
+        return extractResponseAsList(request.getInputStream(), responseClass, null);
     }
 
     /**
@@ -134,7 +134,29 @@ public class RestOperations {
         request.setHeaders(headers);
         request.send(data);
 
-        return extractResponseAsList(request.getInputStream(), responseClass);
+        return extractResponseAsList(request.getInputStream(), responseClass, null);
+    }
+
+    /**
+     * Call API and get result as list object.
+     *
+     * @param url           url
+     * @param httpMethod    http method
+     * @param accessToken   Access token
+     * @param fieldPath     field path
+     * @param responseClass class of object
+     * @param data          data of request
+     * @param <T>           class type
+     * @return list object has specify class type
+     */
+    public <T> ResponseEntity<List<T>> getForListObject(String url, HttpMethods httpMethod, String accessToken, String fieldPath, Class<T> responseClass, Map<String, ?> data) {
+        HttpHeaders headers = HttpHeaders.newInstanceAuth("application/json", accessToken);
+
+        HttpRequest request = new HttpRequest(url, httpMethod);
+        request.setHeaders(headers);
+        request.send(data);
+
+        return extractResponseAsList(request.getInputStream(), responseClass, fieldPath);
     }
 
     /**
@@ -152,7 +174,7 @@ public class RestOperations {
         request.setHeaders(headers);
         request.send(data);
 
-        return extractResponseAsMap(request.getInputStream(), responseClass);
+        return extractResponseAsMap(request.getInputStream(), responseClass, null);
     }
 
     /**
@@ -171,7 +193,7 @@ public class RestOperations {
         request.setHeaders(headers);
         request.send(data);
 
-        return extractResponseAsMap(request.getInputStream(), responseClass);
+        return extractResponseAsMap(request.getInputStream(), responseClass, null);
     }
 
     /**
@@ -188,15 +210,15 @@ public class RestOperations {
         JacksonConverter converter = new JacksonConverter();
         if (converter.support(responseClass)) {
             AtomicReference<Throwable> cause = new AtomicReference<>();
-            T result = (T) converter.read(responseClass, response, cause, path);
+            T result = (T) converter.read(responseClass, response, path, cause);
 
             Throwable thr = cause.get();
             if (null != thr) {
-                throw new ErrorResponseException(thr);
+                throw new ResponseFailureException(thr);
             }
             return new ResponseEntity<>(true, result);
         } else {
-            throw new ConverterUnsupportedJavaTypeException("Converter do not support class " + responseClass.getName());
+            throw new ConverterUnsupportedException("Converter do not support class " + responseClass.getName());
         }
     }
 
@@ -205,46 +227,50 @@ public class RestOperations {
      *
      * @param response      Input Stream of request
      * @param responseClass class of object
+     * @param path          path to get object
      * @param <T>           wildcard for class
      * @return list object
      */
     @SuppressWarnings("unchecked")
-    protected <T> ResponseEntity<List<T>> extractResponseAsList(InputStream response, Class<T> responseClass) {
+    protected <T> ResponseEntity<List<T>> extractResponseAsList(InputStream response, Class<T> responseClass, String path) {
         JacksonConverter converter = new JacksonConverter();
         if (converter.support(responseClass)) {
             AtomicReference<Throwable> cause = new AtomicReference<>();
-            List<T> result = (List<T>) converter.readAsList(responseClass, response, cause);
+            List<T> result = (List<T>) converter.read(responseClass, response, path, JacksonConverter.WRAP_CONTEXT_LIST, cause);
 
             Throwable thr = cause.get();
             if (null != thr) {
-                throw new ErrorResponseException(thr);
+                throw new ResponseFailureException(thr);
             }
             return new ResponseEntity<>(true, result);
         } else {
-            throw new ConverterUnsupportedJavaTypeException("Converter do not support class " + responseClass.getName());
+            throw new ConverterUnsupportedException("Converter do not support class " + responseClass.getName());
         }
     }
 
     /**
      * Extract repsonse as Map.
      *
-     * @param response response
+     * @param response      response
+     * @param responseClass class of object
+     * @param path          path to get object
+     * @param <T>           wildcard for class
      * @return Map data
      */
     @SuppressWarnings("unchecked")
-    protected <T> ResponseEntity<Map<String, T>> extractResponseAsMap(InputStream response, Class<T> responseClass) {
+    protected <T> ResponseEntity<Map<String, T>> extractResponseAsMap(InputStream response, Class<T> responseClass, String path) {
         JacksonConverter converter = new JacksonConverter();
         if (converter.support(responseClass)) {
             AtomicReference<Throwable> cause = new AtomicReference<>();
-            Map<String, T> result = (Map<String, T>) converter.readAsMap(responseClass, response, cause);
+            Map<String, T> result = (Map<String, T>) converter.read(responseClass, response, path, JacksonConverter.WRAP_CONTEXT_MAP, cause);
 
             Throwable thr = cause.get();
             if (null != thr) {
-                throw new ErrorResponseException(thr);
+                throw new ResponseFailureException(thr);
             }
             return new ResponseEntity<>(true, result);
         } else {
-            throw new ConverterUnsupportedJavaTypeException("Converter do not support class " + responseClass.getName());
+            throw new ConverterUnsupportedException("Converter do not support class " + responseClass.getName());
         }
     }
 }

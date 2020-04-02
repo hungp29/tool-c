@@ -1,6 +1,6 @@
 package org.tool.c.utils;
 
-import org.tool.c.exception.ErrorResponseException;
+import org.tool.c.exception.ResponseFailureException;
 import org.tool.c.services.http.ResponseEntity;
 
 import java.time.LocalDateTime;
@@ -60,7 +60,7 @@ public class CommonUtils {
         if (responseEntity.isStatus()) {
             return responseEntity.getObject();
         } else {
-            throw new ErrorResponseException();
+            throw new ResponseFailureException();
         }
     }
 
@@ -107,5 +107,15 @@ public class CommonUtils {
             message = message.replaceAll("\\{" + index++ + "\\}", value);
         }
         return message;
+    }
+
+    /**
+     * Trim value string.
+     *
+     * @param value value need to trim
+     * @return value has trim
+     */
+    public static String trim(String value) {
+        return isEmpty(value) ? "" : value.trim();
     }
 }

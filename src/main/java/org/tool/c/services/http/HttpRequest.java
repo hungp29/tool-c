@@ -38,7 +38,7 @@ public class HttpRequest {
             conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setDoOutput(true);
         } catch (IOException e) {
-            throw new RequestConnectionException(url, e);
+            throw new ConnectionException("Cannot connect to url" + url, e);
         }
     }
 
@@ -54,7 +54,7 @@ public class HttpRequest {
         try {
             conn.setRequestMethod(requestMethod.getCode());
         } catch (ProtocolException e) {
-            throw new RequestMethodException(requestMethod.getCode(), e);
+            throw new RequestMethodNotGrantedException(requestMethod.getCode(), e);
         }
     }
 
@@ -121,7 +121,7 @@ public class HttpRequest {
         try {
             return conn.getResponseCode();
         } catch (IOException e) {
-            throw new ResponseCodeException();
+            throw new ConnectionException("Cannot connect to server", e);
         }
     }
 
@@ -134,7 +134,7 @@ public class HttpRequest {
         try {
             return conn.getOutputStream();
         } catch (IOException e) {
-            throw new RequestIOStreamException(e);
+            throw new IOStreamException(e);
         }
     }
 
@@ -147,7 +147,7 @@ public class HttpRequest {
         try {
             return conn.getInputStream();
         } catch (IOException e) {
-            throw new RequestIOStreamException(e);
+            throw new IOStreamException(e);
         }
     }
 
@@ -185,7 +185,7 @@ public class HttpRequest {
             os.write(object.toString().getBytes());
             os.flush();
         } catch (IOException e) {
-            throw new RequestSendDataException(e);
+            throw new WriteOutputStreamException(e);
         }
     }
 }

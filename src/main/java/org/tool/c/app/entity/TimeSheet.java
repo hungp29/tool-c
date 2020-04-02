@@ -1,13 +1,14 @@
 package org.tool.c.app.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.tool.c.utils.constants.Constants;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-//@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TimeSheet {
 
     private int id;

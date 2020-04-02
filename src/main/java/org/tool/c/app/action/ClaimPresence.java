@@ -30,7 +30,7 @@ public class ClaimPresence extends Base {
         Map<String, Object> data = new HashMap<>();
         data.put("action_name", Actions.PERSONAL_TIMESHEET);
 
-        ResponseEntity<List<TimeSheet>> responseEntity = restOperation.getForListObject(checkinUrl, HttpMethods.POST, accessToken, TimeSheet.class, data);
+        ResponseEntity<List<TimeSheet>> responseEntity = restOperation.getForListObject(checkinUrl, HttpMethods.POST, accessToken, "time_sheet", TimeSheet.class, data);
         return CommonUtils.getResponseObject(responseEntity);
     }
 

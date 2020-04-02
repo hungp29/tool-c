@@ -3,15 +3,15 @@ package org.tool.c.exception;
 /**
  * Read data input stream exception.
  */
-public class ReadDataInputStreamException extends RuntimeException {
+public class ReadInputStreamException extends RuntimeException {
 
     public static final String DEFAULT_ERROR_MESSAGE = "An error occurs while reading data from stream";
 
-    public ReadDataInputStreamException() {
+    public ReadInputStreamException() {
         super(DEFAULT_ERROR_MESSAGE);
     }
 
-    public ReadDataInputStreamException(Throwable thr) {
+    public ReadInputStreamException(Throwable thr) {
         super(DEFAULT_ERROR_MESSAGE, thr);
     }
 }

@@ -2,6 +2,9 @@ package org.tool.c.services.http;
 
 import java.util.*;
 
+/**
+ * Http Header class.
+ */
 public class HttpHeaders implements Map<String, List<String>> {
 
     public static final String CONTENT_TYPE = "Content-Type";

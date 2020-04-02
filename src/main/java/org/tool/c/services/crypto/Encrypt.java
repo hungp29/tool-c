@@ -5,7 +5,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -38,11 +37,10 @@ public class Encrypt {
      * @param data the string need to encrypt
      * @return the string has been encrypt
      * @throws InvalidKeyException
-     * @throws UnsupportedEncodingException
      * @throws BadPaddingException
      * @throws IllegalBlockSizeException
      */
-    public String encryptString(String data) throws InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
+    public String encryptString(String data) throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         this.cipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
         return Base64.getEncoder().encodeToString(this.cipher.doFinal(data.getBytes(StandardCharsets.UTF_8)));
     }

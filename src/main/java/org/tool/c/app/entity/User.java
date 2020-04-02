@@ -2,6 +2,8 @@ package org.tool.c.app.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 public class User {
 
     @JsonProperty("user_id")
@@ -51,5 +53,22 @@ public class User {
 
     public Token getTokenData() {
         return tokenData;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(userId, user.userId) &&
+                Objects.equals(username, user.username) &&
+                Objects.equals(profilePhoto, user.profilePhoto) &&
+                Objects.equals(userRole, user.userRole) &&
+                Objects.equals(tokenData, user.tokenData);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, username, profilePhoto, userRole, tokenData);
     }
 }
