@@ -19,6 +19,8 @@ ext {
     junitVersion = '4.12'
     activationVersion = '1.1.1'
     mailVersion = '1.4.7'
+    commonsBeanUtilsVersion = '1.9.4'
+    velocityVersion = '1.7'
 }
 
 dependencies {
@@ -36,11 +38,15 @@ dependencies {
     compile "javax.mail:mail:$mailVersion"
     runtime "javax.activation:activation:$activationVersion"
 
+    // Common
+    compile "commons-beanutils:commons-beanutils:$commonsBeanUtilsVersion"
+    compile "org.apache.velocity:velocity:$velocityVersion";
+
     // Unit test dependencies
     testCompile "junit:junit:$junitVersion"
 }
 
-task fatJar(type: Jar) {
+task buildJar(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Tool C',
                 'Main-Class': 'org.tool.c.Application'

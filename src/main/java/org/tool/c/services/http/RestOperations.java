@@ -1,21 +1,37 @@
 package org.tool.c.services.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.tool.c.exception.ErrorResponseException;
+import org.tool.c.exception.ConverterUnsupportedException;
+import org.tool.c.exception.ResponseFailureException;
+import org.tool.c.services.http.converter.JacksonConverter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Rest Operation.
  */
 public class RestOperations {
 
+    /**
+     * Call API and get result as object.
+     *
+     * @param url           url
+     * @param httpMethod    http method
+     * @param headers       the headers of request
+     * @param responseClass object class
+     * @param data          data of request
+     * @param <T>           class of object
+     * @return object
+     */
+    public <T> ResponseEntity<T> getForObject(String url, HttpMethods httpMethod, HttpHeaders headers, Class<T> responseClass, Map<String, ?> data) {
+        HttpRequest request = new HttpRequest(url, httpMethod);
+        request.setHeaders(headers);
+        request.send(data);
+
+        return extractResponse(request.getInputStream(), responseClass, null);
+    }
 
     /**
      * Call API and get result as object.
@@ -26,17 +42,15 @@ public class RestOperations {
      * @param data          data of request
      * @param <T>           class of object
      * @return object
-     * @throws IOException
      */
-    public <T> ResponseEntity<T> getForObject(String url, HttpMethods httpMethod, Class<T> responseClass, Map<String, ?> data) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList("application/json"));
+    public <T> ResponseEntity<T> getForObject(String url, HttpMethods httpMethod, Class<T> responseClass, Map<String, ?> data) {
+        HttpHeaders headers = HttpHeaders.newInstance("application/json");
 
         HttpRequest request = new HttpRequest(url, httpMethod);
         request.setHeaders(headers);
         request.send(data);
 
-        return extractResponse(request.getResponseString(), responseClass);
+        return extractResponse(request.getInputStream(), responseClass, null);
     }
 
     /**
@@ -49,18 +63,15 @@ public class RestOperations {
      * @param data          data of request
      * @param <T>           class of object
      * @return object
-     * @throws IOException
      */
-    public <T> ResponseEntity<T> getForObject(String url, HttpMethods httpMethod, String accessToken, Class<T> responseClass, Map<String, ?> data) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList("application/json"));
-        headers.put(HttpHeaders.Authorization, Collections.singletonList(accessToken));
+    public <T> ResponseEntity<T> getForObject(String url, HttpMethods httpMethod, String accessToken, Class<T> responseClass, Map<String, ?> data) {
+        HttpHeaders headers = HttpHeaders.newInstanceAuth("application/json", accessToken);
 
         HttpRequest request = new HttpRequest(url, httpMethod);
         request.setHeaders(headers);
         request.send(data);
 
-        return extractResponse(request.getResponseString(), responseClass);
+        return extractResponse(request.getInputStream(), responseClass, null);
     }
 
     /**
@@ -68,19 +79,21 @@ public class RestOperations {
      *
      * @param url           url
      * @param httpMethod    http method
-     * @param headers       the headers of request
+     * @param accessToken   access token value
+     * @param fieldPath     path to get object
      * @param responseClass object class
      * @param data          data of request
      * @param <T>           class of object
      * @return object
-     * @throws IOException
      */
-    public <T> ResponseEntity<T> getForObject(String url, HttpMethods httpMethod, HttpHeaders headers, Class<T> responseClass, Map<String, ?> data) throws IOException {
+    public <T> ResponseEntity<T> getForObject(String url, HttpMethods httpMethod, String accessToken, String fieldPath, Class<T> responseClass, Map<String, ?> data) {
+        HttpHeaders headers = HttpHeaders.newInstanceAuth("application/json", accessToken);
+
         HttpRequest request = new HttpRequest(url, httpMethod);
         request.setHeaders(headers);
         request.send(data);
 
-        return extractResponse(request.getResponseString(), responseClass);
+        return extractResponse(request.getInputStream(), responseClass, fieldPath);
     }
 
     /**
@@ -92,17 +105,15 @@ public class RestOperations {
      * @param data          data of request
      * @param <T>           class type
      * @return list object has specify class type
-     * @throws IOException
      */
-    public <T> ResponseEntity<List<T>> getForListObject(String url, HttpMethods httpMethod, Class<T> responseClass, Map<String, ?> data) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList("application/json"));
+    public <T> ResponseEntity<List<T>> getForListObject(String url, HttpMethods httpMethod, Class<T> responseClass, Map<String, ?> data) {
+        HttpHeaders headers = HttpHeaders.newInstance("application/json");
 
         HttpRequest request = new HttpRequest(url, httpMethod);
         request.setHeaders(headers);
         request.send(data);
 
-        return extractResponseAsList(request.getResponseString(), responseClass);
+        return extractResponseAsList(request.getInputStream(), responseClass, null);
     }
 
     /**
@@ -115,101 +126,151 @@ public class RestOperations {
      * @param data          data of request
      * @param <T>           class type
      * @return list object has specify class type
-     * @throws IOException
      */
-    public <T> ResponseEntity<List<T>> getForListObject(String url, HttpMethods httpMethod, String accessToken, Class<T> responseClass, Map<String, ?> data) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList("application/json"));
-        headers.put(HttpHeaders.Authorization, Collections.singletonList(accessToken));
+    public <T> ResponseEntity<List<T>> getForListObject(String url, HttpMethods httpMethod, String accessToken, Class<T> responseClass, Map<String, ?> data) {
+        HttpHeaders headers = HttpHeaders.newInstanceAuth("application/json", accessToken);
 
         HttpRequest request = new HttpRequest(url, httpMethod);
         request.setHeaders(headers);
         request.send(data);
 
-        return extractResponseAsList(request.getResponseString(), responseClass);
+        return extractResponseAsList(request.getInputStream(), responseClass, null);
     }
 
-//    /**
-//     * Get Response status.
-//     *
-//     * @param url         url
-//     * @param accessToken access token value
-//     * @param httpMethod  http method
-//     * @param data        data of request
-//     * @return status of response
-//     * @throws IOException
-//     */
-//    public boolean getResponseStatus(String url, String accessToken, HttpMethods httpMethod, Map<String, ?> data) throws IOException {
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList("application/json"));
-//        headers.put(HttpHeaders.Authorization, Collections.singletonList(accessToken);
-//
-//        HttpRequest request = new HttpRequest(url, httpMethod);
-//        request.setHeaders(headers);
-//        request.send(data);
-//
-//        ResponseEntity<Map> responseEntity = extractResponseStatus(request.getResponseString());
-//        return responseEntity.isStatus();
-//    }
-//
-//    public boolean getResponseStatus(String url, HttpHeaders headers, HttpMethods httpMethod, Map<String, ?> data) throws IOException {
-//        HttpRequest request = new HttpRequest(url, httpMethod);
-//        request.setHeaders(headers);
-//        request.send(data);
-//
-//        ResponseEntity<Map> responseEntity = extractResponseStatus(request.getResponseString());
-//        return responseEntity.isStatus();
-//    }
-//
-//    protected ResponseEntity<Map> extractResponseStatus(String response) throws IOException {
-//        ObjectMapper mapper = new ObjectMapper();
-//        Map mapResponse = mapper.readValue(response, Map.class);
-//        boolean status = (boolean) mapResponse.get("success");
-//
-//        if (status) {
-//            Map object = mapper.convertValue(mapResponse.get("result"), Map.class);
-//            return new ResponseEntity<Map>(status, object);
-//        } else {
-//            ErrorResponse object = mapper.convertValue(mapResponse.get("error"), ErrorResponse.class);
-//            throw new ErrorResponseException(object.getCode());
-//        }
-//    }
+    /**
+     * Call API and get result as list object.
+     *
+     * @param url           url
+     * @param httpMethod    http method
+     * @param accessToken   Access token
+     * @param fieldPath     field path
+     * @param responseClass class of object
+     * @param data          data of request
+     * @param <T>           class type
+     * @return list object has specify class type
+     */
+    public <T> ResponseEntity<List<T>> getForListObject(String url, HttpMethods httpMethod, String accessToken, String fieldPath, Class<T> responseClass, Map<String, ?> data) {
+        HttpHeaders headers = HttpHeaders.newInstanceAuth("application/json", accessToken);
 
-    protected <T> ResponseEntity<T> extractResponse(String response, Class<T> responseClass) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        Map mapResponse = mapper.readValue(response, Map.class);
-        boolean status = (boolean) mapResponse.get("success");
+        HttpRequest request = new HttpRequest(url, httpMethod);
+        request.setHeaders(headers);
+        request.send(data);
 
-        if (status) {
-            T object = mapper.convertValue(mapResponse.get("result"), responseClass);
-            return new ResponseEntity<T>(status, object);
+        return extractResponseAsList(request.getInputStream(), responseClass, fieldPath);
+    }
+
+    /**
+     * Call API and get result as Map.
+     *
+     * @param url        utl
+     * @param httpMethod http method
+     * @param data       data
+     * @return Map data
+     */
+    public <T> ResponseEntity<Map<String, T>> getForMap(String url, HttpMethods httpMethod, Class<T> responseClass, Map<String, ?> data) {
+        HttpHeaders headers = HttpHeaders.newInstance("application/json");
+
+        HttpRequest request = new HttpRequest(url, httpMethod);
+        request.setHeaders(headers);
+        request.send(data);
+
+        return extractResponseAsMap(request.getInputStream(), responseClass, null);
+    }
+
+    /**
+     * Call API and get result as Map.
+     *
+     * @param url         utl
+     * @param httpMethod  http method
+     * @param accessToken Access token
+     * @param data        data
+     * @return Map data
+     */
+    public <T> ResponseEntity<Map<String, T>> getForMap(String url, HttpMethods httpMethod, String accessToken, Class<T> responseClass, Map<String, ?> data) {
+        HttpHeaders headers = HttpHeaders.newInstanceAuth("application/json", accessToken);
+
+        HttpRequest request = new HttpRequest(url, httpMethod);
+        request.setHeaders(headers);
+        request.send(data);
+
+        return extractResponseAsMap(request.getInputStream(), responseClass, null);
+    }
+
+    /**
+     * Extract response to ResponseEntity.
+     *
+     * @param response      InputStream response
+     * @param responseClass class of response object
+     * @param path          path to get object
+     * @param <T>           wildcard for response class
+     * @return response entity for object
+     */
+    @SuppressWarnings("unchecked")
+    protected <T> ResponseEntity<T> extractResponse(InputStream response, Class<T> responseClass, String path) {
+        JacksonConverter converter = new JacksonConverter();
+        if (converter.support(responseClass)) {
+            AtomicReference<Throwable> cause = new AtomicReference<>();
+            T result = (T) converter.read(responseClass, response, path, cause);
+
+            Throwable thr = cause.get();
+            if (null != thr) {
+                throw new ResponseFailureException(thr);
+            }
+            return new ResponseEntity<>(true, result);
         } else {
-            ErrorResponse object = mapper.convertValue(mapResponse.get("error"), ErrorResponse.class);
-            throw new ErrorResponseException(object.getCode());
+            throw new ConverterUnsupportedException("Converter do not support class " + responseClass.getName());
         }
     }
 
-    protected <T> ResponseEntity<List<T>> extractResponseAsList(String response, Class<T> responseClass) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        Map mapResponse = mapper.readValue(response, Map.class);
-        boolean status = (boolean) mapResponse.get("success");
+    /**
+     * Extract response to ResponseEntity with List object.
+     *
+     * @param response      Input Stream of request
+     * @param responseClass class of object
+     * @param path          path to get object
+     * @param <T>           wildcard for class
+     * @return list object
+     */
+    @SuppressWarnings("unchecked")
+    protected <T> ResponseEntity<List<T>> extractResponseAsList(InputStream response, Class<T> responseClass, String path) {
+        JacksonConverter converter = new JacksonConverter();
+        if (converter.support(responseClass)) {
+            AtomicReference<Throwable> cause = new AtomicReference<>();
+            List<T> result = (List<T>) converter.read(responseClass, response, path, JacksonConverter.WRAP_CONTEXT_LIST, cause);
 
-        if (status) {
-            Object result = mapResponse.get("result");
-            List<T> lstObject = null;
-            if (result instanceof List) {
-                lstObject = (List<T>) ((List) result).stream().map(obj -> mapper.convertValue(obj, responseClass)).collect(Collectors.toList());
-            } else if (result instanceof Map) {
-                Map<String, List> mapResult = (Map<String, List>) result;
-                if (mapResult.size() == 1) {
-                    lstObject = (List<T>) mapResult.values().stream().flatMap(coll -> coll.stream()).map(obj -> mapper.convertValue(obj, responseClass)).collect(Collectors.toList());
-                }
+            Throwable thr = cause.get();
+            if (null != thr) {
+                throw new ResponseFailureException(thr);
             }
-            return new ResponseEntity<>(status, lstObject);
+            return new ResponseEntity<>(true, result);
         } else {
-            ErrorResponse object = mapper.convertValue(mapResponse.get("error"), ErrorResponse.class);
-            throw new ErrorResponseException(object.getCode());
+            throw new ConverterUnsupportedException("Converter do not support class " + responseClass.getName());
+        }
+    }
+
+    /**
+     * Extract repsonse as Map.
+     *
+     * @param response      response
+     * @param responseClass class of object
+     * @param path          path to get object
+     * @param <T>           wildcard for class
+     * @return Map data
+     */
+    @SuppressWarnings("unchecked")
+    protected <T> ResponseEntity<Map<String, T>> extractResponseAsMap(InputStream response, Class<T> responseClass, String path) {
+        JacksonConverter converter = new JacksonConverter();
+        if (converter.support(responseClass)) {
+            AtomicReference<Throwable> cause = new AtomicReference<>();
+            Map<String, T> result = (Map<String, T>) converter.read(responseClass, response, path, JacksonConverter.WRAP_CONTEXT_MAP, cause);
+
+            Throwable thr = cause.get();
+            if (null != thr) {
+                throw new ResponseFailureException(thr);
+            }
+            return new ResponseEntity<>(true, result);
+        } else {
+            throw new ConverterUnsupportedException("Converter do not support class " + responseClass.getName());
         }
     }
 }

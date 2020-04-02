@@ -37,7 +37,7 @@ public class EncryptSubApp {
             String encryptValue = encrypt.encryptString(data);
 
             // Print out result
-            System.out.println("Encrypt value of \"" + data + "\" is: " + encryptValue);
+            LOG.info("Encrypt value of \"" + data + "\" is: " + encryptValue);
 
             // Save symmetric key
             sk.writeToFile(secretFilePath);

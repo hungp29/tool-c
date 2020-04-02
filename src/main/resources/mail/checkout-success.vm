@@ -1,0 +1,14 @@
+<div style="
+    box-shadow: 0 0px 22px -10px rgba(0, 0, 0, 0.3);
+    width: 95%;
+    margin: 0 auto;
+    font-family: 'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+    padding: 20px;
+    border-radius: 10px;
+    background-image: linear-gradient(147deg, #FFE53B 0%, #fd3838 74%);
+">
+    <p style="text-align: center; font-weight: 600; text-transform: uppercase; color: #f1f1f1;">Checkout Information</p>
+    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Total working time: </span><strong>${workingHours}</strong></p>
+    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkin time: </span><strong>${checkInTime}</strong></p>
+    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkout time: </span><strong>${checkOutTime}</strong></p>
+</div>

@@ -1,13 +1,14 @@
-package org.tool.c.app.claim;
+package org.tool.c.app.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.tool.c.utils.constants.Constants;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-//@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TimeSheet {
 
     private int id;
@@ -20,7 +21,7 @@ public class TimeSheet {
     private LocalDate workDay; // "2020-03-30"
 
     @JsonProperty("work_hours")
-    private double workHours; // "2.74861111111111"
+    private float workHours; // "2.74861111111111"
 
     @JsonProperty("created_at")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", timezone = Constants.TIMEZONE)
@@ -62,11 +63,11 @@ public class TimeSheet {
         this.workDay = workDay;
     }
 
-    public double getWorkHours() {
+    public float getWorkHours() {
         return workHours;
     }
 
-    public void setWorkHours(double workHours) {
+    public void setWorkHours(float workHours) {
         this.workHours = workHours;
     }
 

@@ -1,7 +1,5 @@
 package org.tool.c.services.http;
 
-import java.io.IOException;
-
 /**
  * Response entity.
  *
