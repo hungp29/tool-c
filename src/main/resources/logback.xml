@@ -29,10 +29,10 @@
         <smtpPort>587</smtpPort>
         <STARTTLS>true</STARTTLS>
         <asynchronousSending>false</asynchronousSending>
-        <username>announce.hungpham@gmail.com</username>
+        <username>announce-email-here</username>
         <password>[PROTECTED]</password>
-        <to>hung.phamqk@gmail.com</to>
-        <from>announce.hungpham@gmail.com</from>
+        <to>email-receiver-here</to>
+        <from>announce-email-here</from>
         <subject>[ERROR] TOOL-C: %m - %d{yyyy-MM-dd HH:mm:ss.SSS}</subject>
         <layout class="ch.qos.logback.classic.html.HTMLLayout"/>
     </appender>
