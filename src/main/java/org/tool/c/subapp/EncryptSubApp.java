@@ -23,7 +23,7 @@ public class EncryptSubApp {
 
     public static void main(String[] args) {
         try {
-            String data = ""; // Define value to encrypt here.
+            String data[] = {""}; // Define value to encrypt here.
 
             ResourceBundle bundle = ResourceBundle.getBundle(Constants.BUNDLE_APPLICATION);
             String algorithm = bundle.getString("crypto.algorithm");
@@ -34,10 +34,12 @@ public class EncryptSubApp {
             SymmetricKey sk = new SymmetricKey(length, algorithm);
             // Encrypt
             Encrypt encrypt = new Encrypt(sk.getKey(), algorithm);
-            String encryptValue = encrypt.encryptString(data);
+            for (String value : data) {
+                String encryptValue = encrypt.encryptString(value);
 
-            // Print out result
-            LOG.info("Encrypt value of \"" + data + "\" is: " + encryptValue);
+                // Print out result
+                LOG.info("Encrypt value of \"" + value + "\" is: " + encryptValue);
+            }
 
             // Save symmetric key
             sk.writeToFile(secretFilePath);
