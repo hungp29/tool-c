@@ -11,11 +11,19 @@ public class Application {
 
     private static Logger LOG = LoggerFactory.getLogger(Application.class);
 
-    public static void main(String[] args) {
-        try {
-            CheckinApp.run(args);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
+    public static void main(String[] args) throws InterruptedException {
+        int maxTry = 500;
+        int index = 0;
+        boolean result = false;
+        do {
+            try {
+                result = CheckinApp.run(args);
+            } catch (Exception e) {
+                index++;
+                Thread.sleep(1000L);
+                LOG.error(e.getMessage(), e);
+                LOG.info("Try again: " + index);
+            }
+        } while(!result && index <= maxTry);
     }
 }

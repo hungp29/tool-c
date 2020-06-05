@@ -33,7 +33,7 @@ public class CheckinApp extends BaseApp {
     /**
      * Checkin and Checkout.
      */
-    public void checkin() {
+    public boolean checkin() {
         LOG.info("### START CHECKIN ###");
         LOG.info("Username: " + toolUsername);
 
@@ -109,6 +109,7 @@ public class CheckinApp extends BaseApp {
         }
 
         LOG.info("### END CHECKIN ###");
+        return true;
     }
 
     /**
@@ -153,10 +154,10 @@ public class CheckinApp extends BaseApp {
      *
      * @param args arguments
      */
-    public static void run(String[] args) throws Exception {
+    public static boolean run(String[] args) throws Exception {
         // Print out all arguments
         Arrays.asList(args).forEach(LOG::info);
         CheckinApp app = new CheckinApp();
-        app.checkin();
+        return app.checkin();
     }
 }
