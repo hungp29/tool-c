@@ -2,11 +2,16 @@ package org.tool.c.services.email;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tool.c.exception.CryptoException;
+import org.tool.c.exception.EmailException;
 import org.tool.c.utils.CryptoUtils;
 import org.tool.c.utils.constants.Constants;
 
-import javax.mail.*;
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -83,6 +88,7 @@ public class EmailService {
             Transport.send(message);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
+            throw new EmailException(e.getMessage(), e);
         }
     }
 }
