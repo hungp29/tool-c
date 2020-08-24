@@ -6,11 +6,14 @@ import org.tool.c.services.http.HttpMethods;
 import org.tool.c.services.http.ResponseEntity;
 import org.tool.c.services.http.RestOperations;
 import org.tool.c.utils.CommonUtils;
+import org.tool.c.utils.ZoneUtils;
 import org.tool.c.utils.constants.Actions;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,5 +87,46 @@ public class ClaimPresence extends Base {
         LocalTime endWorkTime = LocalTime.parse(bundle.getString("working.time.afternoon.end"));
         LocalDateTime dateTimeEnd = LocalDateTime.of(LocalDate.now(), endWorkTime);
         return !CommonUtils.isEmpty(timeSheet) && !CommonUtils.isEmpty(timeSheet.getCheckOutTime()) && !timeSheet.getCheckOutTime().isBefore(dateTimeEnd);
+    }
+
+    /**
+     * Calculate late time.
+     *
+     * @param timeSheets list timesheet
+     * @return total late time
+     */
+    public int calcLateTime(List<TimeSheet> timeSheets) {
+        int late = 0;
+        if (null != timeSheets && timeSheets.size() > 0) {
+            int month = LocalDate.now().getMonthValue();
+            int year = LocalDate.now().getYear();
+            LocalTime startMorningWorkTime = LocalTime.parse(bundle.getString("working.time.morning.start"));
+            LocalTime endAfternoonWorkTime = LocalTime.parse(bundle.getString("working.time.afternoon.end"));
+
+            late = timeSheets.parallelStream()
+                    .filter(timeSheet -> timeSheet.getWorkDay().getMonthValue() == month &&
+                            timeSheet.getWorkDay().getYear() == year &&
+                            timeSheet.getWorkDay().getDayOfWeek().getValue() != DayOfWeek.SATURDAY.getValue() &&
+                            timeSheet.getWorkDay().getDayOfWeek().getValue() != DayOfWeek.SUNDAY.getValue())
+                    .mapToInt(value -> {
+                        int timeLate = 0;
+                        LocalDateTime startTime = ZoneUtils.convertToTimeZone(value.getCheckInTime(), bundle.getString("zone.id"));
+                        LocalDateTime endTime = ZoneUtils.convertToTimeZone(value.getCheckOutTime(), bundle.getString("zone.id"));
+
+                        int lateAtStart = (int) Math.ceil((float) ChronoUnit.SECONDS.between(startMorningWorkTime, startTime.toLocalTime()) / 60);
+                        if (lateAtStart > 0) {
+                            timeLate += lateAtStart;
+                        }
+
+                        if (!endTime.isEqual(startTime)) {
+                            int lateAtEnd = (int) Math.ceil((float) ChronoUnit.SECONDS.between(endTime.toLocalTime(), endAfternoonWorkTime) / 60);
+                            if (lateAtEnd > 0) {
+                                timeLate += lateAtEnd;
+                            }
+                        }
+                        return timeLate;
+                    }).sum();
+        }
+        return late;
     }
 }

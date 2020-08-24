@@ -11,4 +11,5 @@
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Total working time: </span><strong>${workingHours}</strong></p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkin time: </span><strong>${checkInTime}</strong></p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkout time: </span><strong>${checkOutTime}</strong></p>
+    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Late time: </span><strong>${lateTime} minutes</strong></p>
 </div>

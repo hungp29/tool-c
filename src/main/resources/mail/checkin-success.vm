@@ -10,4 +10,5 @@
     <p style="text-align: center; font-weight: 600; text-transform: uppercase; color: #f1f1f1;">Checkin Information</p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Working Day: </span><strong>${workingDay}</strong></p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkin time: </span><strong>${checkInTime}</strong></p>
+    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Late time: </span><strong>${lateTime} minutes</strong></p>
 </div>

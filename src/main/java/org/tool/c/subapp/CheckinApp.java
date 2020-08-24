@@ -71,6 +71,8 @@ public class CheckinApp extends BaseApp {
         List<TimeSheet> timeSheets = claimPresence.getPersonalTimeSheet(tokenAccessCheckin);
         TimeSheet currentTimeSheet = claimPresence.getCurrentTimeSheet(timeSheets);
         LOG.info("Get list time sheet of user successful");
+        int lateTime = claimPresence.calcLateTime(timeSheets);
+        LOG.info("Late time: " + lateTime + " minutes");
 
         VelocityService velocityService = new VelocityService();
         if (null == currentTimeSheet) {
@@ -78,7 +80,7 @@ public class CheckinApp extends BaseApp {
             TimeSheet timeSheet = claimPresence.claim(tokenAccessCheckin);
 
             if (null != timeSheet) {
-                Map<String, String> dataMail = prepareDataTimeSheet(timeSheet);
+                Map<String, String> dataMail = prepareDataTimeSheet(timeSheet, lateTime);
                 LOG.info("Checkin successfully " + dataMail.get("checkInTime"));
                 String[] mail = velocityService.mergeForMail("checkin-success", dataMail);
                 EmailService emailService = new EmailService();
@@ -94,7 +96,7 @@ public class CheckinApp extends BaseApp {
                 TimeSheet timeSheet = claimPresence.claim(tokenAccessCheckin);
 
                 if (null != timeSheet) {
-                    Map<String, String> dataMail = prepareDataTimeSheet(timeSheet);
+                    Map<String, String> dataMail = prepareDataTimeSheet(timeSheet, lateTime);
                     LOG.info("Checkout successfully " + dataMail.get("checkOutTime"));
 
                     if (Constants.YES.equals(announcementMultiTime)) {
@@ -118,12 +120,13 @@ public class CheckinApp extends BaseApp {
      * @param timeSheet time sheet
      * @return map data
      */
-    public Map<String, String> prepareDataTimeSheet(TimeSheet timeSheet) {
+    public Map<String, String> prepareDataTimeSheet(TimeSheet timeSheet, int lateTime) {
         Map<String, String> map = new HashMap<>();
         map.put("checkInTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckInTime())));
         map.put("checkOutTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckOutTime())));
         map.put("workingDay", CommonUtils.formatLocalDate(timeSheet.getWorkDay()));
         map.put("workingHours", calcWorkingHours(timeSheet));
+        map.put("lateTime", String.valueOf(lateTime));
         return map;
     }
 
