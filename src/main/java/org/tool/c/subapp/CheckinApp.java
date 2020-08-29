@@ -33,7 +33,7 @@ public class CheckinApp extends BaseApp {
     /**
      * Checkin and Checkout.
      */
-    public boolean checkin() {
+    public boolean checkin(boolean runAnything) {
         LOG.info("### START CHECKIN ###");
         LOG.info("Username: " + toolUsername);
 
@@ -71,8 +71,6 @@ public class CheckinApp extends BaseApp {
         List<TimeSheet> timeSheets = claimPresence.getPersonalTimeSheet(tokenAccessCheckin);
         TimeSheet currentTimeSheet = claimPresence.getCurrentTimeSheet(timeSheets);
         LOG.info("Get list time sheet of user successful");
-        int lateTime = claimPresence.calcLateTime(timeSheets);
-        LOG.info("Late time: " + lateTime + " minutes");
 
         VelocityService velocityService = new VelocityService();
         if (null == currentTimeSheet) {
@@ -80,6 +78,10 @@ public class CheckinApp extends BaseApp {
             TimeSheet timeSheet = claimPresence.claim(tokenAccessCheckin);
 
             if (null != timeSheet) {
+                timeSheets.add(timeSheet);
+                int lateTime = claimPresence.calcLateTime(timeSheets);
+                LOG.info("Late time: " + lateTime + " minutes");
+
                 Map<String, String> dataMail = prepareDataTimeSheet(timeSheet, lateTime);
                 LOG.info("Checkin successfully " + dataMail.get("checkInTime"));
                 String[] mail = velocityService.mergeForMail("checkin-success", dataMail);
@@ -88,14 +90,20 @@ public class CheckinApp extends BaseApp {
             }
         } else {
             boolean isOutWorkingTime = claimPresence.checkIsOutWorkTime();
-            if (isOutWorkingTime) {
-                long timeSleep = ThreadLocalRandom.current().nextLong(1, 60 * 1000);
-                LOG.info("Sleep: " + timeSleep);
-                CommonUtils.sleep(timeSleep);
+            if (isOutWorkingTime || runAnything) {
+                if (!runAnything) {
+                    long timeSleep = ThreadLocalRandom.current().nextLong(1, 60 * 1000);
+                    LOG.info("Sleep: " + timeSleep);
+                    CommonUtils.sleep(timeSleep);
+                }
                 // Checkout
                 TimeSheet timeSheet = claimPresence.claim(tokenAccessCheckin);
 
                 if (null != timeSheet) {
+                    timeSheets.add(timeSheet);
+                    int lateTime = claimPresence.calcLateTime(timeSheets);
+                    LOG.info("Late time: " + lateTime + " minutes");
+
                     Map<String, String> dataMail = prepareDataTimeSheet(timeSheet, lateTime);
                     LOG.info("Checkout successfully " + dataMail.get("checkOutTime"));
 
@@ -140,7 +148,9 @@ public class CheckinApp extends BaseApp {
         LocalTime endMorningWorkTime = LocalTime.parse(bundle.getString("working.time.morning.end"));
         LocalTime startAfternoonWorkTime = LocalTime.parse(bundle.getString("working.time.afternoon.start"));
         Duration duration = Duration.between(timeSheet.getCheckInTime(), timeSheet.getCheckOutTime());
-        long millis = duration.toMillis() - ChronoUnit.MILLIS.between(endMorningWorkTime, startAfternoonWorkTime);
+        long durationTime = duration.toMillis();
+        long relaxTime = ChronoUnit.MILLIS.between(endMorningWorkTime, startAfternoonWorkTime);
+        long millis = durationTime - (relaxTime < durationTime ? relaxTime : 0);
 
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
@@ -159,8 +169,15 @@ public class CheckinApp extends BaseApp {
      */
     public static boolean run(String[] args) throws Exception {
         // Print out all arguments
+        LOG.info("Arguments");
         Arrays.asList(args).forEach(LOG::info);
+
+        boolean runAnything = false;
+        if (args.length > 0) {
+            runAnything = Boolean.parseBoolean(args[0]);
+        }
+
         CheckinApp app = new CheckinApp();
-        return app.checkin();
+        return app.checkin(runAnything);
     }
 }

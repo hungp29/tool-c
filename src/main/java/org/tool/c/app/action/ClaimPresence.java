@@ -118,7 +118,7 @@ public class ClaimPresence extends Base {
                             timeLate += lateAtStart;
                         }
 
-                        if (!endTime.isEqual(startTime)) {
+                        if (!endTime.isEqual(startTime) && endTime.toLocalTime().isAfter(LocalTime.of(17, 0))) {
                             int lateAtEnd = (int) Math.ceil((float) ChronoUnit.SECONDS.between(endTime.toLocalTime(), endAfternoonWorkTime) / 60);
                             if (lateAtEnd > 0) {
                                 timeLate += lateAtEnd;
