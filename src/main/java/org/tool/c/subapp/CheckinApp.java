@@ -30,6 +30,18 @@ public class CheckinApp extends BaseApp {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckinApp.class);
 
+    private static final String MAIL_TYPE_CHECKIN = "checkin-success";
+    private static final String MAIL_TYPE_CHECKOUT = "checkout-success";
+
+    private ClaimPresence claimPresence;
+
+    /**
+     * Default Constructor.
+     */
+    public CheckinApp() {
+        claimPresence = new ClaimPresence();
+    }
+
     /**
      * Checkin and Checkout.
      */
@@ -65,8 +77,6 @@ public class CheckinApp extends BaseApp {
         String tokenAccessCheckin = accessTokenCheckin.getToken();
         LOG.info("Get access token for checkin app successfully");
 
-        ClaimPresence claimPresence = new ClaimPresence();
-
         // Get personal time sheet
         List<TimeSheet> timeSheets = claimPresence.getPersonalTimeSheet(tokenAccessCheckin);
         TimeSheet currentTimeSheet = claimPresence.getCurrentTimeSheet(timeSheets);
@@ -77,17 +87,7 @@ public class CheckinApp extends BaseApp {
             // Checkin
             TimeSheet timeSheet = claimPresence.claim(tokenAccessCheckin);
 
-            if (null != timeSheet) {
-                timeSheets.add(timeSheet);
-                int lateTime = claimPresence.calcLateTime(timeSheets);
-                LOG.info("Late time: " + lateTime + " minutes");
-
-                Map<String, String> dataMail = prepareDataTimeSheet(timeSheet, lateTime);
-                LOG.info("Checkin successfully " + dataMail.get("checkInTime"));
-                String[] mail = velocityService.mergeForMail("checkin-success", dataMail);
-                EmailService emailService = new EmailService();
-                emailService.sendAnnouncement(receiveAnnouncement, mail[0], mail[1]);
-            }
+            sendMail(MAIL_TYPE_CHECKIN, timeSheets, timeSheet);
         } else {
             boolean isOutWorkingTime = claimPresence.checkIsOutWorkTime();
             if (isOutWorkingTime || runAnything) {
@@ -99,20 +99,7 @@ public class CheckinApp extends BaseApp {
                 // Checkout
                 TimeSheet timeSheet = claimPresence.claim(tokenAccessCheckin);
 
-                if (null != timeSheet) {
-                    timeSheets.add(timeSheet);
-                    int lateTime = claimPresence.calcLateTime(timeSheets);
-                    LOG.info("Late time: " + lateTime + " minutes");
-
-                    Map<String, String> dataMail = prepareDataTimeSheet(timeSheet, lateTime);
-                    LOG.info("Checkout successfully " + dataMail.get("checkOutTime"));
-
-                    if (Constants.YES.equals(announcementMultiTime)) {
-                        String[] mail = velocityService.mergeForMail("checkout-success", dataMail);
-                        EmailService emailService = new EmailService();
-                        emailService.sendAnnouncement(receiveAnnouncement, mail[0], mail[1]);
-                    }
-                }
+                sendMail(MAIL_TYPE_CHECKOUT, timeSheets, timeSheet);
             } else {
                 LOG.warn("IN WORKING TIME");
             }
@@ -123,6 +110,40 @@ public class CheckinApp extends BaseApp {
     }
 
     /**
+     * Send mail checkin/checkout successfully to user.
+     *
+     * @param type       mail template (checkin/checkout)
+     * @param timeSheets list timesheet of user
+     * @param timeSheet  checkin/checkout timesheet
+     */
+    private void sendMail(String type, List<TimeSheet> timeSheets, TimeSheet timeSheet) {
+        String mailTemplate = MAIL_TYPE_CHECKIN;
+        if (MAIL_TYPE_CHECKOUT.equals(type)) {
+            mailTemplate = MAIL_TYPE_CHECKOUT;
+        }
+
+        if (null != timeSheet) {
+            timeSheets.add(timeSheet);
+            int lateTime = claimPresence.calcLateTime(timeSheets);
+            LOG.info("Latencies Time: " + lateTime + " minutes");
+
+            Map<String, String> dataMail = prepareDataTimeSheet(timeSheet, lateTime);
+            if (MAIL_TYPE_CHECKIN.equals(type)) {
+                LOG.info("Checkin successfully " + dataMail.get("checkInTime"));
+            } else {
+                LOG.info("Checkout successfully " + dataMail.get("checkOutTime"));
+            }
+
+            if (Constants.YES.equals(announcementMultiTime)) {
+                VelocityService velocityService = new VelocityService();
+                String[] mail = velocityService.mergeForMail(mailTemplate, dataMail);
+                EmailService emailService = new EmailService();
+                emailService.sendAnnouncement(receiveAnnouncement, mail[0], mail[1]);
+            }
+        }
+    }
+
+    /**
      * Prepare data time sheet to set mail template.
      *
      * @param timeSheet time sheet
@@ -130,8 +151,8 @@ public class CheckinApp extends BaseApp {
      */
     public Map<String, String> prepareDataTimeSheet(TimeSheet timeSheet, int lateTime) {
         Map<String, String> map = new HashMap<>();
-        map.put("checkInTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckInTime())));
-        map.put("checkOutTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckOutTime())));
+        map.put("checkInTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckInTime()), Constants.TIME_FM));
+        map.put("checkOutTime", CommonUtils.formatLocalDateTime(CommonUtils.convertToSystemTimeZone(timeSheet.getCheckOutTime()), Constants.TIME_FM));
         map.put("workingDay", CommonUtils.formatLocalDate(timeSheet.getWorkDay()));
         map.put("workingHours", calcWorkingHours(timeSheet));
         map.put("lateTime", String.valueOf(lateTime));

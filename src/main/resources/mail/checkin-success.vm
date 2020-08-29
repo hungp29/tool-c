@@ -5,10 +5,13 @@
     font-family: 'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
     padding: 20px;
     border-radius: 10px;
-    background-image: linear-gradient(147deg, #FFE53B 0%, #fd3838 74%);
+    background: rgb(255,255,255);
+    /*background: linear-gradient(157deg, rgba(255,255,255,1) 0%, rgba(0,0,0,1) 23%, rgba(0,212,255,1) 85%);*/
+    background: linear-gradient(157deg, rgba(255,255,255,1) 0%, rgba(83,83,83,1) 23%, rgba(0,212,255,1) 84%);
+    /*background: linear-gradient(157deg, rgba(0,212,255,1) 26%, rgba(83,83,83,1) 79%, rgba(255,255,255,1) 92%);*/
 ">
     <p style="text-align: center; font-weight: 600; text-transform: uppercase; color: #f1f1f1;">Checkin Information</p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Working Day: </span><strong>${workingDay}</strong></p>
-    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkin time: </span><strong>${checkInTime}</strong></p>
-    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Late time: </span><strong>${lateTime} minutes</strong></p>
+    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkin Time: </span><strong>${checkInTime}</strong></p>
+    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Latencies Time: </span><strong>${lateTime} minutes</strong></p>
 </div>
