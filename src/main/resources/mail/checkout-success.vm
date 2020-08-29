@@ -12,7 +12,7 @@
 ">
     <p style="text-align: center; font-weight: 600; text-transform: uppercase; color: #f1f1f1;">Checkout Information</p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Working Day: </span><strong>${workingDay}</strong></p>
-    <p style="color: #efff00;"><span style="display: inline-block; width: 165px;">Working Time: </span><strong>${workingHours}</strong></p>
+    <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Working Time: </span><strong style="color: #efff00;">${workingHours}</strong></p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkin Time: </span><strong>${checkInTime}</strong></p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkout Time: </span><strong>${checkOutTime}</strong></p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Latencies Time: </span><strong>${lateTime} minutes</strong></p>
