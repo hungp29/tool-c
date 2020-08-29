@@ -147,10 +147,12 @@ public class CheckinApp extends BaseApp {
     private String calcWorkingHours(TimeSheet timeSheet) {
         LocalTime endMorningWorkTime = LocalTime.parse(bundle.getString("working.time.morning.end"));
         LocalTime startAfternoonWorkTime = LocalTime.parse(bundle.getString("working.time.afternoon.start"));
-        Duration duration = Duration.between(timeSheet.getCheckInTime(), timeSheet.getCheckOutTime());
-        long durationTime = duration.toMillis();
-        long relaxTime = ChronoUnit.MILLIS.between(endMorningWorkTime, startAfternoonWorkTime);
-        long millis = durationTime - (relaxTime < durationTime ? relaxTime : 0);
+
+        long millis = Duration.between(timeSheet.getCheckInTime(), timeSheet.getCheckOutTime()).toMillis();
+
+        if (!timeSheet.getCheckOutTime().toLocalTime().isBefore(startAfternoonWorkTime)) {
+            millis -= ChronoUnit.MILLIS.between(endMorningWorkTime, startAfternoonWorkTime);
+        }
 
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
@@ -168,12 +170,11 @@ public class CheckinApp extends BaseApp {
      * @param args arguments
      */
     public static boolean run(String[] args) throws Exception {
-        // Print out all arguments
-        LOG.info("Arguments");
-        Arrays.asList(args).forEach(LOG::info);
-
         boolean runAnything = false;
         if (args.length > 0) {
+            // Print out all arguments
+            LOG.info("Arguments");
+            Arrays.asList(args).forEach(LOG::info);
             runAnything = Boolean.parseBoolean(args[0]);
         }
 

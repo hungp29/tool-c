@@ -6,7 +6,6 @@ import org.tool.c.services.http.HttpMethods;
 import org.tool.c.services.http.ResponseEntity;
 import org.tool.c.services.http.RestOperations;
 import org.tool.c.utils.CommonUtils;
-import org.tool.c.utils.ZoneUtils;
 import org.tool.c.utils.constants.Actions;
 
 import java.time.DayOfWeek;
@@ -110,8 +109,8 @@ public class ClaimPresence extends Base {
                             timeSheet.getWorkDay().getDayOfWeek().getValue() != DayOfWeek.SUNDAY.getValue())
                     .mapToInt(value -> {
                         int timeLate = 0;
-                        LocalDateTime startTime = ZoneUtils.convertToTimeZone(value.getCheckInTime(), bundle.getString("zone.id"));
-                        LocalDateTime endTime = ZoneUtils.convertToTimeZone(value.getCheckOutTime(), bundle.getString("zone.id"));
+                        LocalDateTime startTime = CommonUtils.convertToSystemTimeZone(value.getCheckInTime());
+                        LocalDateTime endTime = CommonUtils.convertToSystemTimeZone(value.getCheckOutTime());
 
                         int lateAtStart = (int) Math.ceil((float) ChronoUnit.SECONDS.between(startMorningWorkTime, startTime.toLocalTime()) / 60);
                         if (lateAtStart > 0) {
