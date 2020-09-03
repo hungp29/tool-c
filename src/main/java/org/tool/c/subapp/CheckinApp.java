@@ -82,7 +82,6 @@ public class CheckinApp extends BaseApp {
         TimeSheet currentTimeSheet = claimPresence.getCurrentTimeSheet(timeSheets);
         LOG.info("Get list time sheet of user successful");
 
-        VelocityService velocityService = new VelocityService();
         if (null == currentTimeSheet) {
             // Checkin
             TimeSheet timeSheet = claimPresence.claim(tokenAccessCheckin);
@@ -123,7 +122,11 @@ public class CheckinApp extends BaseApp {
         }
 
         if (null != timeSheet) {
-            timeSheets.add(timeSheet);
+            if (!timeSheets.contains(timeSheet)) {
+                timeSheets.add(timeSheet);
+            } else {
+                timeSheets.set(timeSheets.indexOf(timeSheet), timeSheet);
+            }
             int lateTime = claimPresence.calcLateTime(timeSheets);
             LOG.info("Latencies Time: " + lateTime + " minutes");
 

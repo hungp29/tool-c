@@ -7,6 +7,7 @@ import org.tool.c.utils.constants.Constants;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TimeSheet {
@@ -101,5 +102,20 @@ public class TimeSheet {
 
     public void setCheckOutTime(LocalDateTime checkOutTime) {
         this.checkOutTime = checkOutTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TimeSheet timeSheet = (TimeSheet) o;
+        return id == timeSheet.id &&
+                userId == timeSheet.userId &&
+                workDay.equals(timeSheet.workDay);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userId, workDay);
     }
 }
