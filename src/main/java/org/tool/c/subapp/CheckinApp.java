@@ -11,6 +11,7 @@ import org.tool.c.base.BaseApp;
 import org.tool.c.services.email.EmailService;
 import org.tool.c.services.pattern.VelocityService;
 import org.tool.c.utils.CommonUtils;
+import org.tool.c.utils.JarFileUtils;
 import org.tool.c.utils.constants.Constants;
 
 import java.time.Duration;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.JarFile;
 
 /**
  * Checkin app.
@@ -34,11 +36,14 @@ public class CheckinApp extends BaseApp {
     private static final String MAIL_TYPE_CHECKOUT = "checkout-success";
 
     private ClaimPresence claimPresence;
+    private String version;
 
     /**
      * Default Constructor.
      */
-    public CheckinApp() {
+    public CheckinApp(String version) {
+        this.version = version;
+
         claimPresence = new ClaimPresence();
     }
 
@@ -159,6 +164,7 @@ public class CheckinApp extends BaseApp {
         map.put("workingDay", CommonUtils.formatLocalDate(timeSheet.getWorkDay()));
         map.put("workingHours", calcWorkingHours(timeSheet));
         map.put("lateTime", String.valueOf(lateTime));
+        map.put("version", version);
         return map;
     }
 
@@ -194,6 +200,12 @@ public class CheckinApp extends BaseApp {
      * @param args arguments
      */
     public static boolean run(String[] args) throws Exception {
+
+        String version = JarFileUtils.getVersion();
+        if (null != version && !version.isEmpty()) {
+            LOG.info("VERSION: " + version);
+        }
+
         boolean runAnything = false;
         if (args.length > 0) {
             // Print out all arguments
@@ -202,7 +214,7 @@ public class CheckinApp extends BaseApp {
             runAnything = Boolean.parseBoolean(args[0]);
         }
 
-        CheckinApp app = new CheckinApp();
+        CheckinApp app = new CheckinApp(version);
         return app.checkin(runAnything);
     }
 }

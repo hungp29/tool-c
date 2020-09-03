@@ -49,7 +49,8 @@ dependencies {
 task buildJar(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Tool C',
-                'Main-Class': 'org.tool.c.Application'
+                'Main-Class': 'org.tool.c.Application',
+                'App-Version': "${project.version}"
     }
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar

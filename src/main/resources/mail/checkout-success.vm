@@ -16,4 +16,7 @@
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkin Time: </span><strong>${checkInTime}</strong></p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Checkout Time: </span><strong>${checkOutTime}</strong></p>
     <p style="color: #fff;"><span style="display: inline-block; width: 165px;">Latencies Time: </span><strong>${lateTime} minutes</strong></p>
+    #if (${version})
+        <div style="text-align: right;"><p style="color: #585858;width:50px;display:inline-block;text-align:center;height:30px;margin:0;line-height:30px;background: #ffffff;border-radius:4px;"><strong>1.0.7</strong></p></div>
+    #end
 </div>
