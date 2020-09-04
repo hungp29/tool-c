@@ -144,3 +144,8 @@ Desktop.ini
 # ESLint
 ######################
 .eslintcache
+
+######################
+# Crypto file
+######################
+crypto/

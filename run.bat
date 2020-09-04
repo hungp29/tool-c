@@ -1,3 +1,4 @@
 cd D:\workspaces\apps\tool-c
 
-java -jar temp-1.0.0.jar
+java -jar tool-c-1.0.7.jar %1
+REM PAUSE
