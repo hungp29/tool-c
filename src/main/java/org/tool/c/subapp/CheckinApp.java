@@ -180,7 +180,7 @@ public class CheckinApp extends BaseApp {
 
         long millis = Duration.between(timeSheet.getCheckInTime(), timeSheet.getCheckOutTime()).toMillis();
 
-        if (!timeSheet.getCheckOutTime().toLocalTime().isBefore(startAfternoonWorkTime)) {
+        if (!CommonUtils.convertToSystemTimeZone(timeSheet.getCheckOutTime()).toLocalTime().isBefore(startAfternoonWorkTime)) {
             millis -= ChronoUnit.MILLIS.between(endMorningWorkTime, startAfternoonWorkTime);
         }
 
