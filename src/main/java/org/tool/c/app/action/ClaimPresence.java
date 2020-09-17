@@ -128,4 +128,18 @@ public class ClaimPresence extends Base {
         }
         return late;
     }
+
+    /**
+     * Checking checkin time is latency or not.
+     *
+     * @param timeSheet time sheet
+     * @return true if latency
+     */
+    public boolean isLate(TimeSheet timeSheet) {
+        if (null != timeSheet && timeSheet.getWorkDay().equals(LocalDate.now())) {
+            LocalTime startMorningWorkTime = LocalTime.parse(bundle.getString("working.time.morning.start"));
+            return !CommonUtils.convertToSystemTimeZone(timeSheet.getCheckInTime()).toLocalTime().isBefore(startMorningWorkTime);
+        }
+        return false;
+    }
 }

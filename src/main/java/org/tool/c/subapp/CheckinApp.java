@@ -1,5 +1,6 @@
 package org.tool.c.subapp;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tool.c.app.action.Authentication;
@@ -164,7 +165,10 @@ public class CheckinApp extends BaseApp {
         map.put("workingDay", CommonUtils.formatLocalDate(timeSheet.getWorkDay()));
         map.put("workingHours", calcWorkingHours(timeSheet));
         map.put("lateTime", String.valueOf(lateTime));
-        map.put("version", version);
+        if (!StringUtils.isEmpty(version)) {
+            map.put("version", version);
+        }
+        map.put("isLate", String.valueOf(claimPresence.isLate(timeSheet)));
         return map;
     }
 
