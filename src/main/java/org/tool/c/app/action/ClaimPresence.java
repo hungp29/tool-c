@@ -123,6 +123,11 @@ public class ClaimPresence extends Base {
                                 timeLate += lateAtEnd;
                             }
                         }
+
+                        // When you forgot checkout, latencies time will be add 5 minutes
+                        if (startTime.isEqual(endTime)) {
+                            timeLate = 5;
+                        }
                         return timeLate;
                     }).sum();
         }
