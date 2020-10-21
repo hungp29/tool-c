@@ -125,7 +125,7 @@ public class ClaimPresence extends Base {
                         }
 
                         // When you forgot checkout, latencies time will be add 5 minutes
-                        if (startTime.isEqual(endTime)) {
+                        if (!LocalDate.now().isEqual(value.getWorkDay()) && startTime.isEqual(endTime)) {
                             timeLate = 5;
                         }
                         return timeLate;
