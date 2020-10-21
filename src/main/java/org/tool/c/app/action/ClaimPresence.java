@@ -16,6 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Claim for Presence.
@@ -146,5 +147,24 @@ public class ClaimPresence extends Base {
             return !CommonUtils.convertToSystemTimeZone(timeSheet.getCheckInTime()).toLocalTime().isBefore(startMorningWorkTime);
         }
         return false;
+    }
+
+    /**
+     * Checking first checkout.
+     *
+     * @param timeSheets list time sheet
+     * @return true if first checkout
+     */
+    public boolean isFirstCheckout(List<TimeSheet> timeSheets) {
+        AtomicBoolean isFirstCheckout = new AtomicBoolean(false);
+        if (null != timeSheets && timeSheets.size() > 0) {
+            timeSheets.stream()
+                    .filter(timeSheet -> timeSheet.getWorkDay().isEqual(LocalDate.now()))
+                    .findFirst()
+                    .ifPresent(timeSheet -> {
+                        isFirstCheckout.set(timeSheet.getCheckInTime().isEqual(timeSheet.getCheckOutTime()));
+                    });
+        }
+        return isFirstCheckout.get();
     }
 }
