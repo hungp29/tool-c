@@ -1,5 +1,7 @@
 package org.tool.c.app.action;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tool.c.app.entity.TimeSheet;
 import org.tool.c.base.Base;
 import org.tool.c.services.http.HttpMethods;
@@ -22,6 +24,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Claim for Presence.
  */
 public class ClaimPresence extends Base {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClaimPresence.class);
 
     /**
      * Get personal time sheet.
@@ -165,6 +169,7 @@ public class ClaimPresence extends Base {
                         isFirstCheckout.set(timeSheet.getCheckInTime().isEqual(timeSheet.getCheckOutTime()));
                     });
         }
+        LOG.info("First checkout: " + isFirstCheckout.get());
         return isFirstCheckout.get();
     }
 }
