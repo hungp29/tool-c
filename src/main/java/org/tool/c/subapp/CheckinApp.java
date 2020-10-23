@@ -96,7 +96,7 @@ public class CheckinApp extends BaseApp {
         } else {
             boolean isOutWorkingTime = claimPresence.checkIsOutWorkTime();
             if (isOutWorkingTime || runAnything) {
-                if (!runAnything || !claimPresence.isFirstCheckout(timeSheets)) {
+                if (!runAnything && !claimPresence.isFirstCheckout(timeSheets)) {
                     long timeSleep = ThreadLocalRandom.current().nextLong(1, 60 * 1000);
                     LOG.info("Sleep: " + timeSleep);
                     CommonUtils.sleep(timeSleep);

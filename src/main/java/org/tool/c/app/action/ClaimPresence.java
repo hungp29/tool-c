@@ -169,7 +169,6 @@ public class ClaimPresence extends Base {
                         isFirstCheckout.set(timeSheet.getCheckInTime().isEqual(timeSheet.getCheckOutTime()));
                     });
         }
-        LOG.info("First checkout: " + isFirstCheckout.get());
         return isFirstCheckout.get();
     }
 }
