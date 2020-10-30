@@ -1,5 +1,9 @@
 package org.tool.c.app.action;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import org.tool.c.app.entity.Condition;
 import org.tool.c.app.entity.Scope;
 import org.tool.c.app.entity.Token;
@@ -96,6 +100,11 @@ public class Authentication extends Base {
     public String getCodeOauthRequest(Map<String, String> oauthAppMap, String accessToken) {
         RestOperations restOperation = new RestOperations();
 
+        // Get user id from access token
+        String payloadToken = accessToken.substring(0, accessToken.lastIndexOf(".") + 1);
+        Jwt<Header, Claims> untrusted = Jwts.parserBuilder().build().parseClaimsJwt(payloadToken);
+        int userId = untrusted.getBody().get("userId", Integer.class);
+
         // Prepare data
         Condition condition = new Condition();
         condition.setSubset(Arrays.asList("id", "username", "profilePhoto", "branchId", "branch"));
@@ -106,7 +115,7 @@ public class Authentication extends Base {
         Map<String, Object> data = new HashMap<>();
         data.put("action", Actions.CREATE_OAUTH_REQUEST);
         data.put("appId", oauthAppMap.get("id"));
-        data.put("userId", Integer.parseInt(bundle.getString("tool.user.id")));
+        data.put("userId", userId);
         data.put("scope", Collections.singletonList(scope));
         data.put("callbackUrl", CommonUtils.getValueFromArrayString((String) oauthAppMap.get("callbackUrls")));
 
