@@ -1,18 +1,17 @@
 package org.tool.c.subapp;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tool.c.app.action.AccessTokenAction;
 import org.tool.c.app.action.Authentication;
+import org.tool.c.app.action.AuthenticationTokenAction;
 import org.tool.c.app.action.ClaimPresence;
+import org.tool.c.app.action.OAuthAction;
 import org.tool.c.app.entity.TimeSheet;
 import org.tool.c.app.entity.Token;
 import org.tool.c.app.entity.User;
-import org.tool.c.base.BaseApp;
+import org.tool.c.bundle.AppBundle;
 import org.tool.c.services.email.EmailService;
 import org.tool.c.services.pattern.VelocityService;
 import org.tool.c.utils.CommonUtils;
@@ -28,12 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.jar.JarFile;
 
 /**
  * Checkin app.
  */
-public class CheckinApp extends BaseApp {
+public class CheckinApp extends AppBundle {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckinApp.class);
 
@@ -58,20 +56,23 @@ public class CheckinApp extends BaseApp {
     public boolean checkin(boolean runAnything) {
         LOG.info("### START CHECKIN ###");
         LOG.info("Username: " + toolUsername);
+        Authentication auth = new Authentication();
 
         // Get authentication token
-        Authentication auth = new Authentication();
-        Token authToken = auth.authenticateIdentity(toolUsername, toolPassword);
+        AuthenticationTokenAction authenticationTokenAction = new AuthenticationTokenAction();
+        Token authToken = authenticationTokenAction.authenticateIdentity(toolUsername, toolPassword);
         String tokenAuth = authToken.getToken();
         LOG.info("Get identity authentication token successful");
 
         // Get Access token
-        Token accessTokenIdentity = auth.getAccessToken(identityUrl, tokenAuth);
+        AccessTokenAction accessTokenAction = new AccessTokenAction();
+        Token accessTokenIdentity = accessTokenAction.getAccessToken(identityUrl, tokenAuth);
         String tokenAccessIdentity = accessTokenIdentity.getToken();
         LOG.info("Get identity access token successful");
 
         // Get oath app
-        Map<String, String> oauthAppMap = auth.getOauthApp(tokenAccessIdentity);
+        OAuthAction oAuthAction = new OAuthAction();
+        Map<String, String> oauthAppMap = oAuthAction.getOauthApp(tokenAccessIdentity);
         LOG.info("Get Oauth App map successful");
 
         // Get code for oauth checkin app

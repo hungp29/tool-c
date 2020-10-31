@@ -3,13 +3,12 @@ package org.tool.c.app.action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tool.c.app.entity.TimeSheet;
-import org.tool.c.base.Base;
+import org.tool.c.bundle.AppBundle;
 import org.tool.c.services.http.HttpMethods;
 import org.tool.c.services.http.ResponseEntity;
 import org.tool.c.services.http.RestOperations;
 import org.tool.c.utils.CommonUtils;
 import org.tool.c.utils.constants.Actions;
-import org.tool.c.utils.constants.Constants;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -24,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Claim for Presence.
  */
-public class ClaimPresence extends Base {
+public class ClaimPresence extends AppBundle {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClaimPresence.class);
 

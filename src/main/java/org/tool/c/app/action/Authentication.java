@@ -8,7 +8,7 @@ import org.tool.c.app.entity.Condition;
 import org.tool.c.app.entity.Scope;
 import org.tool.c.app.entity.Token;
 import org.tool.c.app.entity.User;
-import org.tool.c.base.Base;
+import org.tool.c.bundle.AppBundle;
 import org.tool.c.services.http.HttpMethods;
 import org.tool.c.services.http.ResponseEntity;
 import org.tool.c.services.http.RestOperations;
@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Authentication class.
  */
-public class Authentication extends Base {
+public class Authentication extends AppBundle {
 
     /**
      * Authentication by username and password.

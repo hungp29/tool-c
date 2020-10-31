@@ -24,4 +24,6 @@ public class Constants {
     public static final String DATE_FM = "dd-MM-yyyy";
 
     public static final String YES = "Y";
+
+    public static final String DOT = ".";
 }

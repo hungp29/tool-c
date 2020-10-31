@@ -3,7 +3,7 @@ package org.tool.c.services.pattern;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.tool.c.base.Base;
+import org.tool.c.bundle.AppBundle;
 
 import java.io.StringWriter;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Properties;
 /**
  * Velocity Service.
  */
-public class VelocityService extends Base {
+public class VelocityService extends AppBundle {
 
     private static final String SUFFIX = ".vm";
     private VelocityEngine velocityEngine;
