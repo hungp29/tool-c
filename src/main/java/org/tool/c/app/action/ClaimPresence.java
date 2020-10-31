@@ -9,6 +9,7 @@ import org.tool.c.services.http.ResponseEntity;
 import org.tool.c.services.http.RestOperations;
 import org.tool.c.utils.CommonUtils;
 import org.tool.c.utils.constants.Actions;
+import org.tool.c.utils.constants.Constants;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -132,6 +133,9 @@ public class ClaimPresence extends Base {
                         // When you forgot checkout, latencies time will be add 5 minutes
                         if (!LocalDate.now().isEqual(value.getWorkDay()) && startTime.isEqual(endTime)) {
                             timeLate = 5;
+                        }
+                        if (timeLate > 0) {
+                            LOG.info("Date: " + CommonUtils.formatLocalDate(value.getWorkDay()) + "; Latencies: " + timeLate);
                         }
                         return timeLate;
                     }).sum();
