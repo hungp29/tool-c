@@ -41,7 +41,7 @@ dependencies {
 
     // JWT
     compile "io.jsonwebtoken:jjwt-api:$jwtVersion"
-    runtime "io.jsonwebtoken:jjwt-impl:$jwtVersion",
+    compile "io.jsonwebtoken:jjwt-impl:$jwtVersion",
             "io.jsonwebtoken:jjwt-jackson:$jwtVersion"
 
     // Common
